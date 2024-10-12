@@ -15,6 +15,27 @@
       "when": 1725049000329,
       "tag": "0001_rich_ricochet",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1728651780859,
+      "tag": "0002_rich_turbo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1728655007162,
+      "tag": "0003_windy_ultragirl",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1728678312685,
+      "tag": "0004_careless_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

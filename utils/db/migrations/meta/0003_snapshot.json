@@ -1,0 +1,468 @@
+{
+  "id": "585fe35b-1b0c-4148-b5f7-9b12807af4d9",
+  "prevId": "364b5381-02bd-4d3d-903f-664589be14ed",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.exercises": {
+      "name": "exercises",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "force": {
+          "name": "force",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "level": {
+          "name": "level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "equipment": {
+          "name": "equipment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mechanic": {
+          "name": "mechanic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_muscles": {
+          "name": "primary_muscles",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY[]::text[]"
+        },
+        "secondary_muscles": {
+          "name": "secondary_muscles",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY[]::text[]"
+        },
+        "image_urls": {
+          "name": "image_urls",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY[]::text[]"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.users_table": {
+      "name": "users_table",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan": {
+          "name": "plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stripe_id": {
+          "name": "stripe_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_table_phone_number_unique": {
+          "name": "users_table_phone_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "phone_number"
+          ]
+        }
+      }
+    },
+    "public.workout_plan": {
+      "name": "workout_plan",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "friendly_name": {
+          "name": "friendly_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workout_plan_user_id_users_table_id_fk": {
+          "name": "workout_plan_user_id_users_table_id_fk",
+          "tableFrom": "workout_plan",
+          "tableTo": "users_table",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.workout_plan_item": {
+      "name": "workout_plan_item",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "workout_plan_id": {
+          "name": "workout_plan_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exercise_id": {
+          "name": "exercise_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preview_image_url": {
+          "name": "preview_image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workout_plan_item_workout_plan_id_workout_plan_id_fk": {
+          "name": "workout_plan_item_workout_plan_id_workout_plan_id_fk",
+          "tableFrom": "workout_plan_item",
+          "tableTo": "workout_plan",
+          "columnsFrom": [
+            "workout_plan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "workout_plan_item_exercise_id_exercises_id_fk": {
+          "name": "workout_plan_item_exercise_id_exercises_id_fk",
+          "tableFrom": "workout_plan_item",
+          "tableTo": "exercises",
+          "columnsFrom": [
+            "exercise_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.workout_plan_item_set": {
+      "name": "workout_plan_item_set",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "workout_plan_item_id": {
+          "name": "workout_plan_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reps": {
+          "name": "reps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rest": {
+          "name": "rest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workout_plan_item_set_workout_plan_item_id_workout_plan_item_id_fk": {
+          "name": "workout_plan_item_set_workout_plan_item_id_workout_plan_item_id_fk",
+          "tableFrom": "workout_plan_item_set",
+          "tableTo": "workout_plan_item",
+          "columnsFrom": [
+            "workout_plan_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.workout_session": {
+      "name": "workout_session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workout_plan_id": {
+          "name": "workout_plan_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "completed": {
+          "name": "completed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'false'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workout_session_user_id_users_table_id_fk": {
+          "name": "workout_session_user_id_users_table_id_fk",
+          "tableFrom": "workout_session",
+          "tableTo": "users_table",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "workout_session_workout_plan_id_workout_plan_id_fk": {
+          "name": "workout_session_workout_plan_id_workout_plan_id_fk",
+          "tableFrom": "workout_session",
+          "tableTo": "workout_plan",
+          "columnsFrom": [
+            "workout_plan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.workout_session_item_set_log": {
+      "name": "workout_session_item_set_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "workout_session_id": {
+          "name": "workout_session_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workout_plan_item_set_id": {
+          "name": "workout_plan_item_set_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_completed": {
+          "name": "is_completed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'false'"
+        },
+        "actual_reps": {
+          "name": "actual_reps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actual_weight": {
+          "name": "actual_weight",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actual_rest": {
+          "name": "actual_rest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workout_session_item_set_log_workout_session_id_workout_session_id_fk": {
+          "name": "workout_session_item_set_log_workout_session_id_workout_session_id_fk",
+          "tableFrom": "workout_session_item_set_log",
+          "tableTo": "workout_session",
+          "columnsFrom": [
+            "workout_session_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "workout_session_item_set_log_workout_plan_item_set_id_workout_plan_item_set_id_fk": {
+          "name": "workout_session_item_set_log_workout_plan_item_set_id_workout_plan_item_set_id_fk",
+          "tableFrom": "workout_session_item_set_log",
+          "tableTo": "workout_plan_item_set",
+          "columnsFrom": [
+            "workout_plan_item_set_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

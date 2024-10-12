@@ -5,20 +5,17 @@ import WorkoutLayout from "@/components/layouts/workout-layout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Welcome to Gymbro",
+    title: "Welcome to your fitness journey",
     description: "Track your workouts and nutrition with ease",
 };
 
-export default async function DashboardLayout({
+export default async function ProtectedLayout({
     children,
 }: Readonly<{
-    
     children: React.ReactNode;
 }>) {
-
+    
     return (
-        <html lang="en">
             <WorkoutLayout>{children}</WorkoutLayout>
-        </html>
     );
 }

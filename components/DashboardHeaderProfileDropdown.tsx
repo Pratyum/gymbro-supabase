@@ -12,12 +12,11 @@ import Link from "next/link"
 import { } from "@supabase/supabase-js"
 import { createClient } from '@/utils/supabase/server'
 import { logout } from '@/app/auth/actions'
-import { generateStripeBillingPortalLink } from "@/utils/stripe/api"
 
 export default async function DashboardHeaderProfileDropdown() {
     const supabase = createClient()
     const { data: { user }, error } = await supabase.auth.getUser()
-    const billingPortalURL = await generateStripeBillingPortalLink(user!.email!)
+    // const billingPortalURL = await generateStripeBillingPortalLink(user!.email!)
     return (
         <nav className="flex items-center">
             <Button variant="ghost" size="icon" className="mr-2">
@@ -49,7 +48,7 @@ export default async function DashboardHeaderProfileDropdown() {
                     <Link href="#">
                         <DropdownMenuItem>
                             <ReceiptText className="mr-2 h-4 w-4" />
-                            <Link href={billingPortalURL}>Billing</Link>
+                            <Link href={'#billingPortalURL'}>Billing</Link>
                         </DropdownMenuItem>
                     </Link>
                     <Link href="#">
