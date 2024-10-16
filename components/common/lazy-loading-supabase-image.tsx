@@ -44,7 +44,7 @@ export default function LazyLoadingSupabaseImage({
       setIsLoading(false)
     }
   }, [fullPath, supabase.storage]);
-  
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -56,13 +56,14 @@ export default function LazyLoadingSupabaseImage({
       { rootMargin: '100px' }
     )
 
-    if (imageRef.current) {
-      observer.observe(imageRef.current)
+    const currentImageRef = imageRef.current;
+    if (currentImageRef) {
+      observer.observe(currentImageRef)
     }
 
     return () => {
-      if (imageRef.current) {
-        observer.unobserve(imageRef.current)
+      if (currentImageRef) {
+        observer.unobserve(currentImageRef)
       }
     }
   }, [fetchImage]);
