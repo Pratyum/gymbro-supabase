@@ -147,7 +147,7 @@ export async function verifyOtp(
           eq(usersTable.email, user!.email!)
         )
       );
-    console.log(checkUserInDB);
+
     if (checkUserInDB.length === 0) {
       // create Stripe Customer Record
       const stripeID = await createStripeCustomer(user!.id, user!.email!, "");

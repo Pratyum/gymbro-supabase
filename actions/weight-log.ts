@@ -41,16 +41,12 @@ export async function addWeightLog(
     const weight = formData.get("weight") as string;
     const date = formData.get("date") as string;
 
-    console.log(weight, date);
-    
-
     const newWeightLog = await db.insert(weightLog).values({
       userId: dbUser.id,
       weight: weight,
       date: new Date(date),
     });
 
-    console.log(newWeightLog);
     revalidatePath("/weight");
   } catch (e: any) {
     return { message: 'Something went wrong' };

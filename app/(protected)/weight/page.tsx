@@ -9,7 +9,6 @@ export const metadata = {
 
 export default async function Weight() {
   const weightData = await getAllWeightLogs();
-  console.log(weightData);
   return (
     <div className="space-y-4">
       <WeightLogPage weightData={weightData} />
