@@ -1,13 +1,7 @@
 'use client';
 
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  XAxis, CartesianGrid
 } from "recharts";
 
 import {
@@ -18,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AddWeightDialog } from "./add-weight-form";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import LazyLoadingSupabaseImage from "./common/lazy-loading-supabase-image";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Camera } from "lucide-react";
@@ -27,10 +21,66 @@ import { Button } from "./ui/button";
 type WeightLogPageProps = {
   weightData?: Array<{ date: Date; weight: string ; photoUrl: string | null }>;
 };
+
+import { Area, AreaChart } from "recharts";
+
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
+import { ClassValue } from "clsx";
+
+export const description = "A simple area chart"
+
+const DEFAULT_CHART_CONFIG = {
+  weight: {
+    label: "Weight",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig
+
+export function MyAreaChart({chartData, chartConfig = DEFAULT_CHART_CONFIG , className}: {chartData: Array<{ date: string; weight: number }>, chartConfig?: ChartConfig , className?: ClassValue}) {
+  return (
+        <ChartContainer config={chartConfig}  className={cn("min-h-[200px] w-full", className)}>
+          <AreaChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => formatDate(new Date(value), "MMM d")}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="line" />}
+            />
+            <Area
+              dataKey="weight"
+              type="natural"
+              fill="var(--color-weight)"
+              fillOpacity={0.4}
+              stroke="var(--color-weight)"
+            />
+          </AreaChart>
+        </ChartContainer>
+  )
+}
+
+
 export default function WeightLogPage({
   weightData = [],
 }: WeightLogPageProps) {
-  console.log(weightData);
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-row justify-between">
@@ -44,25 +94,10 @@ export default function WeightLogPage({
           <CardDescription>Your weight journey over time</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={weightData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis domain={["dataMin - 1", "dataMax + 1"]} />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="#8884d8"
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+           <MyAreaChart className="max-h-[300px]" chartData={weightData.map((log) => ({
+              date: format(log.date, "yyyy MMM dd"),
+              weight: parseFloat(log.weight),
+           }))} />
         </CardContent>
       </Card>
 

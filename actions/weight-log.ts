@@ -2,7 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/utils/db/db";
 import { SelectWeightLog, usersTable, weightLog } from "@/utils/db/schema";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { format } from "date-fns";
 
@@ -29,7 +29,8 @@ export async function getAllWeightLogs() {
   const weightLogs = await db
     .select()
     .from(weightLog)
-    .where(eq(weightLog.userId, dbUser.id));
+    .where(eq(weightLog.userId, dbUser.id))
+    .orderBy(asc(weightLog.date));
   return weightLogs;
 }
 
