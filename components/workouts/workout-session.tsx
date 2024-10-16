@@ -20,7 +20,11 @@ const exercises: Exercise[] = [
   { name: 'Mountain Climbers', sets: 3, reps: 25 },
 ]
 
-export default function WorkoutPage() {
+type WorkoutPageProps = {
+  sessionId: number;
+}
+
+export default function WorkoutPage({sessionId}: WorkoutPageProps) {
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false)
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
   const [timer, setTimer] = useState(0)

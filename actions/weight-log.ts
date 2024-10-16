@@ -35,8 +35,12 @@ export async function getAllWeightLogs() {
 export async function addWeightLog(
   currentState: { message: string },
   formData: FormData
-): Promise<{ message: string } | void> {
+){
+  if(formData.get("weight") === null || formData.get("date") === null) {
+    return { message: 'Please fill all the fields' };
+  }
   const { user, dbUser } = await getUser();
+  
   try {
     const weight = formData.get("weight") as string;
     const date = formData.get("date") as string;
@@ -48,6 +52,7 @@ export async function addWeightLog(
     });
 
     revalidatePath("/weight");
+    return {message : ''}
   } catch (e: any) {
     return { message: 'Something went wrong' };
   }

@@ -1,4 +1,5 @@
 'use client'
+
 import { CalendarIcon, Plus } from "lucide-react"
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
@@ -12,10 +13,11 @@ import { useState } from "react"
 import { FaSpinner } from "react-icons/fa"
 import { useFormState, useFormStatus } from "react-dom"
 
-export function AddWeightForm(){
+export function AddWeightForm() {
     const [date, setDate] = useState<Date>(new Date());
     const [weight, setWeight] = useState<string>('');
     const [photo, setPhoto] = useState<File | null>(null);
+
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -24,14 +26,13 @@ export function AddWeightForm(){
     };
 
     const initialState = {
-        date: new Date().toISOString(),
-        weight: '70',
+        message: ''
     };
 
     const [formState, formAction] = useFormState(addWeightLog, initialState);
     const {pending} = useFormStatus();
-    
-    return (<form action={formAction} className="space-y-4">
+    return (
+    <form action={formAction} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
@@ -41,7 +42,6 @@ export function AddWeightForm(){
                   variant={"outline"}
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -52,7 +52,7 @@ export function AddWeightForm(){
                 <Calendar
                   mode="single"
                   selected={date}
-                  onSelect={(date) => setDate(date?? new Date())}
+                  onSelect={(date) => setDate(date ?? new Date())}
                   initialFocus
                 />
               </PopoverContent>
@@ -77,7 +77,6 @@ export function AddWeightForm(){
             name="photo"
             type="file"
             accept="image/*"
-            value={photo?.name}
             onChange={handlePhotoUpload}
           />
         </div>
