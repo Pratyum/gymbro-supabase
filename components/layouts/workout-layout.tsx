@@ -12,7 +12,7 @@ export default function WorkoutLayout({ children }: WorkoutLayoutProps) {
       <Sidebar />
 
       {/* Main content area */}
-      <main className="flex-1 overflow-y-auto p-4 lg:p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-blue-100 to-purple-100 p-4 sm:p-6 lg:p-8">{children}</main>
 
       {/* Bottom navigation for mobile and tablet */}
       <BottomNavigation />
