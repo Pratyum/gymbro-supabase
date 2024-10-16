@@ -82,6 +82,7 @@ export const weightLog = pgTable('weight_log', {
     userId: integer('user_id').notNull().references(() => usersTable.id),
     weight: text('weight').notNull(),
     date: timestamp('date').notNull().defaultNow(),
+    photoUrl: text('photo_url'),
 });
 
 export type InsertUser = typeof usersTable.$inferInsert;

@@ -1,70 +1,41 @@
-"use client";
+'use client';
 
 import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from "recharts";
 
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { AddWeightForm } from "./add-weight-form";
+import { AddWeightDialog } from "./add-weight-form";
 import { format } from "date-fns";
-
-// Mock data for the weight log
-const initialWeightData = [
-  { date: new Date("2023-05-01"), weight: '70' },
-  { date: new Date("2023-05-08"), weight: '69.5' },
-  { date: new Date("2023-05-15"), weight: '69' },
-  { date: new Date("2023-05-22"), weight: '68.5' },
-  { date: new Date("2023-05-29"), weight: '68.2' },
-];
+import LazyLoadingSupabaseImage from "./common/lazy-loading-supabase-image";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Camera } from "lucide-react";
+import { Button } from "./ui/button";
 
 type WeightLogPageProps = {
-  weightData?: Array<{ date: Date; weight: string }>;
+  weightData?: Array<{ date: Date; weight: string ; photoUrl: string | null }>;
 };
 export default function WeightLogPage({
-  weightData = initialWeightData,
+  weightData = [],
 }: WeightLogPageProps) {
-
+  console.log(weightData);
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-row justify-between">
         <h1 className="text-3xl font-bold">Weight Log</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Add Weight Log</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add Weight Log</DialogTitle>
-              <DialogDescription>
-                Add your weight log to track your progress
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <AddWeightForm />
-            </div>
-          </DialogContent>
-        </Dialog>
+        <AddWeightDialog />
       </div>
 
       <Card>
@@ -110,7 +81,25 @@ export default function WeightLogPage({
                     key={index}
                     className="flex justify-between items-center border-b py-2 last:border-b-0"
                   >
-                    <span>{format(log.date , 'PPP')}</span>
+                    <span className="inline-flex gap-4 items-center">{format(log.date , 'PPP')}{log.photoUrl && (
+                      <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline"><Camera /></Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Photo</DialogTitle>
+                          <DialogDescription>
+                            Here&apos;s the photo of your weight log
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                        <LazyLoadingSupabaseImage fullPath={log.photoUrl} alt={format(log.date, 'PPP')} width={200} height={200} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                      
+                    )}</span>
                     <span className="font-semibold">{log.weight} kg</span>
                   </li>
                 ))}
