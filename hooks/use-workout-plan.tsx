@@ -1,6 +1,10 @@
 "use client";
 
-import { WorkoutPlan, WorkoutPlanItem, WorkoutPlanWithItemsAndSets } from "@/types";
+import {
+  WorkoutPlan,
+  WorkoutPlanItem,
+  WorkoutPlanWithItemsAndSets,
+} from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 type WorkoutPlanProps = {
@@ -23,13 +27,11 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
   });
 
   const { mutateAsync: updateWorkoutPlanInDb } = useMutation({
-    mutationFn: async ({ friendlyName }: Partial<WorkoutPlan>) => {
+    mutationFn: async (payload: Partial<WorkoutPlan>) => {
       const response = await fetch(`/api/workout-plan/${workoutPlanId}`, {
         credentials: "include",
-        method: "POST",
-        body: JSON.stringify({
-          friendlyName,
-        }),
+        method: "PATCH",
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       return data;
@@ -39,9 +41,10 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
   // Workout Item Create
   const { mutateAsync: addWorkoutItemToDb } = useMutation({
     mutationFn: async () => {
-      const payload: Omit<WorkoutPlanItem , 'id'> = {
+      const payload: Omit<WorkoutPlanItem, "id"> = {
         exerciseId: 900,
         workoutPlanId: workoutPlanId,
+        order: workoutPlan?.items.length ?? 0,
       };
       const response = await fetch(`/api/workout-plan/${workoutPlanId}`, {
         credentials: "include",
@@ -55,11 +58,40 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
 
   // Workout Item Delete
   const { mutateAsync: removeWorkoutItemInDb } = useMutation({
-    mutationFn: async ({ workoutPlanItemId }: {workoutPlanItemId : number}) => {
-      const response = await fetch(`/api/workout-plan/${workoutPlanId}/${workoutPlanItemId}`, {
-        credentials: "include",
-        method: "DELETE",
-      });
+    mutationFn: async ({
+      workoutPlanItemId,
+    }: {
+      workoutPlanItemId: number;
+    }) => {
+      const response = await fetch(
+        `/api/workout-plan/${workoutPlanId}/${workoutPlanItemId}`,
+        {
+          credentials: "include",
+          method: "DELETE",
+        }
+      );
+      const data = await response.json();
+      return data;
+    },
+  });
+
+  // Workout Item Update
+  const { mutateAsync: updateWorkoutPlanItemInDb } = useMutation({
+    mutationFn: async ({
+      workoutPlanItemId,
+      workoutPlan
+    }: {
+      workoutPlanItemId: number;
+      workoutPlan: Partial<WorkoutPlanItem>;
+    }) => {
+      const response = await fetch(
+        `/api/workout-plan/${workoutPlanId}/${workoutPlanItemId}`,
+        {
+          credentials: "include",
+          method: "PATCH",
+          body: JSON.stringify(workoutPlan)
+        }
+      );
       const data = await response.json();
       return data;
     },
@@ -71,6 +103,7 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
     refetchWorkoutPlan,
     updateWorkoutPlanInDb,
     addWorkoutItemToDb,
+    updateWorkoutPlanItemInDb,
     removeWorkoutItemInDb,
   };
 };

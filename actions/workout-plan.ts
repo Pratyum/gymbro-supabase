@@ -27,7 +27,7 @@ export const getWorkoutPlanById = async (id: number) => {
     const resWorkoutItems = await db
       .select()
       .from(workoutPlanItem)
-      .where(eq(workoutPlanItem.workoutPlanId, id)) as WorkoutPlanItem[];
+      .where(eq(workoutPlanItem.workoutPlanId, id)).orderBy(workoutPlanItem.order) as WorkoutPlanItem[];
     if (!resWorkoutItems) {
       return {
         success: true,
@@ -43,7 +43,7 @@ export const getWorkoutPlanById = async (id: number) => {
     const resWorkoutItemSets = await db
       .select()
       .from(workoutPlanItemSet)
-      .where(inArray(workoutPlanItemSet.workoutPlanItemId, workoutItemIds)) as WorkoutPlanItemSet[];
+      .where(inArray(workoutPlanItemSet.workoutPlanItemId, workoutItemIds)).orderBy(workoutPlanItemSet.id) as WorkoutPlanItemSet[];
     if (!resWorkoutItemSets || !resWorkoutItemSets.length) {
       return {
         success: true,

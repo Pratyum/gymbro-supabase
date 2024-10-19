@@ -38,7 +38,6 @@ export async function addWeightLog(
   currentState: { message: string },
   formData: FormData
 ) {
-  console.log(formData.has("photo"));
   if (formData.get("weight") === null || formData.get("date") === null) {
     return { message: "Please fill all the fields" };
   }

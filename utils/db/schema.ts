@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
@@ -33,11 +33,21 @@ export const exercisesTable = pgTable("exercises", {
     .notNull()
     .default(sql`ARRAY[]::text[]`),
 });
-
+export const dayOfWeekEnum = pgEnum('day_of_week', [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday'
+])
 export const workoutPlan = pgTable("workout_plan", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => usersTable.id),
   friendlyName: text("friendly_name").notNull(),
+  frequency: dayOfWeekEnum('frequency').array().notNull().default(sql`ARRAY[]::day_of_week[]`),
+  startDate: timestamp("start_date"),
 });
 
 export const workoutPlanRelations = relations(workoutPlan, ({ many }) => ({
@@ -52,7 +62,7 @@ export const workoutPlanItem = pgTable("workout_plan_item", {
   exerciseId: integer("exercise_id").references(() => exercisesTable.id),
   name: text("name"),
   previewImageUrl: text("preview_image_url"),
-  order: integer("order").notNull(), // This is the order in which to do the exercises
+  order: integer("order").notNull().default(-1), // This is the order in which to do the exercises
   isSuperSet: text("is_super_set").notNull().default("false"),
 });
 
@@ -79,6 +89,8 @@ export const workoutSession = pgTable("workout_session", {
   userId: integer("user_id").references(() => usersTable.id),
   workoutPlanId: integer("workout_plan_id").references(() => workoutPlan.id),
   createdAt: timestamp("date").defaultNow(),
+  plannedAt: timestamp("planned_at"),
+  startedAt: timestamp("started_at"),
   completed: text("completed").notNull().default("false"),
 });
 

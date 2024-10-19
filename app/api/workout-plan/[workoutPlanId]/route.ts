@@ -1,9 +1,9 @@
 import { getUser } from "@/actions/weight-log";
 import {
-    addWorkoutPlanItem,
-    getWorkoutPlanById,
-    removeWorkoutPlan,
-    updateWorkoutPlan,
+  addWorkoutPlanItem,
+  getWorkoutPlanById,
+  removeWorkoutPlan,
+  updateWorkoutPlan,
 } from "@/actions/workout-plan";
 import { InsertWorkoutPlan, InsertWorkoutPlanItem } from "@/utils/db/schema";
 import { NextRequest, NextResponse } from "next/server";
@@ -55,7 +55,11 @@ export async function PATCH(
   }
   const response = await updateWorkoutPlan(
     parseInt(workoutPlanId, 10),
-    payload
+    {
+      ...(payload.frequency && { frequency: payload.frequency }),
+      ...(payload.startDate && { startDate: new Date(payload.startDate) }),
+      ...(payload.friendlyName && { friendlyName: payload.friendlyName }),
+    }
   );
   return NextResponse.json(response);
 }

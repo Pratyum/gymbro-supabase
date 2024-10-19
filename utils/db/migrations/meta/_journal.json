@@ -50,6 +50,27 @@
       "when": 1729275086077,
       "tag": "0006_ordinary_shatterstar",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1729331967860,
+      "tag": "0009_fearless_miss_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1729356188222,
+      "tag": "0008_fair_mantis",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1729361849841,
+      "tag": "0010_black_bushwacker",
+      "breakpoints": true
     }
   ]
 }
