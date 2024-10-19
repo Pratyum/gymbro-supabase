@@ -30,9 +30,11 @@ export default function LazyLoadingSupabaseImage({
 
   const fetchImage = useCallback(async () => {
     try {
+      const bucketName = fullPath.split('/')[0];
+      const path = fullPath.split('/').slice(1).join('/');
       const { data, error } = await supabase.storage
-        .from('') // Replace with your actual bucket name
-        .createSignedUrl(fullPath, 60) // 60 seconds expiration
+        .from(bucketName)
+        .createSignedUrl(path, 60) // 60 seconds expiration
 
       if (error) throw error
 
