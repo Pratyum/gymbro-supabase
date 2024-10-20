@@ -8,6 +8,7 @@ export const usersTable = pgTable("users_table", {
   email: text("email"),
   plan: text("plan").notNull(),
   stripe_id: text("stripe_id").notNull(),
+  organizationId: integer("organization_id")
 });
 
 export const exercisesTable = pgTable("exercises", {
@@ -130,6 +131,29 @@ export const weightLog = pgTable("weight_log", {
   photoUrl: text("photo_url"),
 });
 
+
+// Organizations
+export const organizations = pgTable("organizations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  address: text("address").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  website: text("website"),
+  logoUrl: text("logo_url"),
+  coverUrl: text("cover_url"),
+  description: text("description"),
+  adminUserId: integer("admin_user_id").references(() => usersTable.id),
+});
+
+export const organizationUsersRelations =  relations(usersTable, ({ one }) => ({
+  organization: one(organizations, {
+    relationName: "organizationId",
+    fields: [usersTable.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
 
@@ -155,3 +179,6 @@ export type SelectWorkoutSessionItemSetLog =
 
 export type InsertWeightLog = typeof weightLog.$inferInsert;
 export type SelectWeightLog = typeof weightLog.$inferSelect;
+
+export type InsertOrganization = typeof organizations.$inferInsert;
+export type SelectOrganization = typeof organizations.$inferSelect;

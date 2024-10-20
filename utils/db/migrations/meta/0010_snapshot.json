@@ -1,6 +1,6 @@
 {
-  "id": "cebd9b1d-6af5-4d73-9af3-97154fa3973c",
-  "prevId": "d532eafb-11d5-4abc-99bb-8b16a7f374c7",
+  "id": "ae0d6217-db2d-40a3-8b43-d92f4b6d3966",
+  "prevId": "953a1139-9b4a-40a0-b3f8-b4bd9f9de2b8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -90,6 +90,90 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.organizations": {
+      "name": "organizations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "website": {
+          "name": "website",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_url": {
+          "name": "cover_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "admin_user_id": {
+          "name": "admin_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "organizations_admin_user_id_users_table_id_fk": {
+          "name": "organizations_admin_user_id_users_table_id_fk",
+          "tableFrom": "organizations",
+          "tableTo": "users_table",
+          "columnsFrom": [
+            "admin_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.users_table": {
       "name": "users_table",
       "schema": "",
@@ -129,6 +213,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -417,6 +507,18 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "planned_at": {
+          "name": "planned_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         },
         "completed": {
           "name": "completed",

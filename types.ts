@@ -45,3 +45,17 @@ export type WorkoutPlanItemWithSets = WorkoutPlanItem & {
 export type WorkoutPlanWithItemsAndSets = WorkoutPlan & {
   items: WorkoutPlanItemWithSets[];
 };
+
+export type WorkoutSession = {
+  id: number;
+  userId: number;
+  workoutPlanId: number;
+  createdAt: Date;
+  plannedAt?: Date;
+  startedAt?: Date;
+  completed: "true" | "false";
+};
+
+export type WorkoutSessionWithPlan = WorkoutSession & {
+  workoutPlan?: WorkoutPlanWithItemsAndSets;
+};
