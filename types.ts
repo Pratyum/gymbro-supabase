@@ -59,3 +59,38 @@ export type WorkoutSession = {
 export type WorkoutSessionWithPlan = WorkoutSession & {
   workoutPlan?: WorkoutPlanWithItemsAndSets;
 };
+
+// Organizations
+export type Organization = {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website?: string;
+  logoUrl?: string;
+  coverUrl?: string;
+  description?: string;
+  adminUserId: number;
+}
+
+export type Leads = {
+  id: number;
+  source: string;
+  status: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+  organizationId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type Appointment = {
+  id: number;
+  userId: number;
+  trainerId: number;
+  startDate?: Date;
+  endDate?: Date;
+  notes?: string;
+}

@@ -15,9 +15,10 @@ export async function getStripePlan(email: string) {
     return product.name
 }
 
-export async function createStripeCustomer(id: string, email: string, name?: string) {
+export async function createStripeCustomer(id: string, phone?:string, email?: string, name?: string) {
     const customer = await stripe.customers.create({
         name: name ? name : "",
+        phone: phone,
         email: email,
         metadata: {
             supabase_id: id

@@ -1,5 +1,7 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
+
+const RoleEnum = pgEnum('RoleEnum', ['admin', 'trainer', 'member']);
 
 export const usersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
@@ -8,7 +10,8 @@ export const usersTable = pgTable("users_table", {
   email: text("email"),
   plan: text("plan").notNull(),
   stripe_id: text("stripe_id").notNull(),
-  organizationId: integer("organization_id")
+  organizationId: integer("organization_id"),
+  role: RoleEnum('role').notNull().default('member'),
 });
 
 export const exercisesTable = pgTable("exercises", {
@@ -154,6 +157,36 @@ export const organizationUsersRelations =  relations(usersTable, ({ one }) => ({
   }),
 }));
 
+// Leads
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  source: text("source").notNull(),
+  status: text("status").notNull().default('new'),
+  name: text("name"),
+  email: text("email"),
+  phone: text("phone"),
+  notes: text("notes"),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (t) => ({
+  unq: unique().on(t.id, t.name , t.organizationId, t.phone),
+}));
+// Appointments Table
+export const appointments = pgTable('appointments', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => usersTable.id).notNull(),
+  trainerId: integer('trainer_id').references(() => usersTable.id),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  notes: text('notes'),
+});
+
+export const appointmentRelations = relations(appointments, ({ one }) => ({
+  user: one(usersTable),
+  trainer: one(usersTable),
+}));
+
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
 
@@ -182,3 +215,9 @@ export type SelectWeightLog = typeof weightLog.$inferSelect;
 
 export type InsertOrganization = typeof organizations.$inferInsert;
 export type SelectOrganization = typeof organizations.$inferSelect;
+
+export type InsertLead = typeof leads.$inferInsert;
+export type SelectLead = typeof leads.$inferSelect;
+
+export type InsertAppointment = typeof appointments.$inferInsert;
+export type SelectAppointment = typeof appointments.$inferSelect;
