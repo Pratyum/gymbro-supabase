@@ -1,14 +1,6 @@
 "use client";
 
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import { XAxis, CartesianGrid } from "recharts";
 
 import {
     Card,
@@ -17,6 +9,9 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { AddWeightDialog } from "./add-weight-form";
+import { format, formatDate } from "date-fns";
+import LazyLoadingSupabaseImage from "./common/lazy-loading-supabase-image";
 import {
     Dialog,
     DialogContent,
@@ -25,99 +20,153 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "./ui/dialog";
+import { Camera } from "lucide-react";
 import { Button } from "./ui/button";
-import { AddWeightForm } from "./add-weight-form";
-import { format } from "date-fns";
-
-// Mock data for the weight log
-const initialWeightData = [
-  { date: new Date("2023-05-01"), weight: '70' },
-  { date: new Date("2023-05-08"), weight: '69.5' },
-  { date: new Date("2023-05-15"), weight: '69' },
-  { date: new Date("2023-05-22"), weight: '68.5' },
-  { date: new Date("2023-05-29"), weight: '68.2' },
-];
 
 type WeightLogPageProps = {
-  weightData?: Array<{ date: Date; weight: string }>;
+  weightData?: Array<{ date: Date; weight: string; photoUrl: string | null }>;
 };
-export default function WeightLogPage({
-  weightData = initialWeightData,
-}: WeightLogPageProps) {
 
-  return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-row justify-between">
-        <h1 className="text-3xl font-bold">Weight Log</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Add Weight Log</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add Weight Log</DialogTitle>
-              <DialogDescription>
-                Add your weight log to track your progress
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <AddWeightForm />
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+import { Area, AreaChart } from "recharts";
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Weight Progress</CardTitle>
-          <CardDescription>Your weight journey over time</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={weightData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis domain={["dataMin - 1", "dataMax + 1"]} />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="#8884d8"
-                  activeDot={{ r: 8 }}
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
+import { ClassValue } from "clsx";
+
+export const description = "A simple area chart";
+
+const DEFAULT_CHART_CONFIG = {
+    weight: {
+        label: "Weight",
+        color: "hsl(var(--chart-2))",
+    },
+} satisfies ChartConfig;
+
+export function MyAreaChart({
+    chartData,
+    chartConfig = DEFAULT_CHART_CONFIG,
+    className,
+}: {
+  chartData: Array<{ date: string; weight: number }>;
+  chartConfig?: ChartConfig;
+  className?: ClassValue;
+}) {
+    return (
+        <ChartContainer
+            config={chartConfig}
+            className={cn("min-h-[200px] w-full", className)}
+        >
+            <AreaChart
+                accessibilityLayer
+                data={chartData}
+                margin={{
+                    left: 12,
+                    right: 12,
+                }}
+            >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => formatDate(new Date(value), "MMM d")}
                 />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="line" />}
+                />
+                <Area
+                    dataKey="weight"
+                    type="natural"
+                    fill="var(--color-weight)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-weight)"
+                />
+            </AreaChart>
+        </ChartContainer>
+    );
+}
 
-      {weightData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Logs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {weightData
-                .slice(-5)
-                .reverse()
-                .map((log, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between items-center border-b py-2 last:border-b-0"
-                  >
-                    <span>{format(log.date , 'PPP')}</span>
-                    <span className="font-semibold">{log.weight} kg</span>
-                  </li>
-                ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+export default function WeightLogPage({ weightData = [] }: WeightLogPageProps) {
+    return (
+        <div className="container mx-auto p-4 space-y-6">
+            <div className="flex flex-row justify-between">
+                <h1 className="text-3xl font-bold">Weight Log</h1>
+                <AddWeightDialog />
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Weight Progress</CardTitle>
+                    <CardDescription>Your weight journey over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <MyAreaChart
+                        className="max-h-[300px]"
+                        chartData={weightData.map((log) => ({
+                            date: format(log.date, "yyyy MMM dd"),
+                            weight: parseFloat(log.weight),
+                        }))}
+                    />
+                </CardContent>
+            </Card>
+
+            {weightData.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Logs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="space-y-2">
+                            {weightData
+                                .slice(-5)
+                                .reverse()
+                                .map((log, index) => (
+                                    <li
+                                        key={index}
+                                        className="flex justify-between items-center border-b py-2 last:border-b-0"
+                                    >
+                                        <span className="inline-flex gap-4 items-center">
+                                            {format(log.date, "PPP")}
+                                            {log.photoUrl && (
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button variant="outline">
+                                                            <Camera />
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[425px]">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Photo</DialogTitle>
+                                                            <DialogDescription>
+                                Here&apos;s the photo of your weight log
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <div className="grid gap-4 py-4">
+                                                            <LazyLoadingSupabaseImage
+                                                                fullPath={log.photoUrl}
+                                                                alt={format(log.date, "PPP")}
+                                                                width={200}
+                                                                height={200}
+                                                            />
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            )}
+                                        </span>
+                                        <span className="font-semibold">{log.weight} kg</span>
+                                    </li>
+                                ))}
+                        </ul>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    );
 }

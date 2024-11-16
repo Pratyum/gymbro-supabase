@@ -1,16 +1,18 @@
-import { Menu, Search } from "lucide-react"
-import Link from "next/link"
+import { Menu, Search } from "lucide-react";
+import Link from "next/link";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import Image from 'next/image'
-import { createClient } from '@/utils/supabase/server'
-import DashboardHeaderProfileDropdown from "./DashboardHeaderProfileDropdown"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import { createClient } from "@/utils/supabase/server";
+import DashboardHeaderProfileDropdown from "./DashboardHeaderProfileDropdown";
 
 export default async function DashboardHeader() {
-    const supabase = createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
-    
+    const supabase = await createClient();
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -20,17 +22,29 @@ export default async function DashboardHeader() {
                         <Image src="/logo.png" alt="logo" width={25} height={25} />
                     </Link>
                     <nav className="flex items-center space-x-6 text-sm font-medium">
-                        <Link className="transition-colors hover:text-foreground/80 text-foreground" href="#">
-                            Home
+                        <Link
+                            className="transition-colors hover:text-foreground/80 text-foreground"
+                            href="#"
+                        >
+              Home
                         </Link>
-                        <Link className="transition-colors hover:text-foreground/80 text-foreground/60" href="#">
-                            Projects
+                        <Link
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                            href="#"
+                        >
+              Projects
                         </Link>
-                        <Link className="transition-colors hover:text-foreground/80 text-foreground/60" href="#">
-                            Tasks
+                        <Link
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                            href="#"
+                        >
+              Tasks
                         </Link>
-                        <Link className="transition-colors hover:text-foreground/80 text-foreground/60" href="#">
-                            Reports
+                        <Link
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                            href="#"
+                        >
+              Reports
                         </Link>
                     </nav>
                 </div>
@@ -55,5 +69,5 @@ export default async function DashboardHeader() {
                 </div>
             </div>
         </header>
-    )
+    );
 }

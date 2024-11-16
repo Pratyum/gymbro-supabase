@@ -36,6 +36,55 @@
       "when": 1728678312685,
       "tag": "0004_careless_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1729105316294,
+      "tag": "0005_whole_harpoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1729275086077,
+      "tag": "0006_ordinary_shatterstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1729331967860,
+      "tag": "0009_fearless_miss_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1729356188222,
+      "tag": "0008_fair_mantis",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1729361849841,
+      "tag": "0010_black_bushwacker",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1729433546657,
+      "tag": "0011_acoustic_galactus",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1731742795812,
+      "tag": "0011_shallow_titanium_man",
+      "breakpoints": true
     }
   ]
 }

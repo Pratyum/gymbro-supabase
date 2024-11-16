@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default async function ProtectedLayout({
     children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    
-    return (
-            <WorkoutLayout>{children}</WorkoutLayout>
-    );
+    return <WorkoutLayout>{children}</WorkoutLayout>;
 }

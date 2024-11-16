@@ -12,13 +12,7 @@ export const metadata: Metadata = {
 export default async function DashboardLayout({
     children,
 }: Readonly<{
-    
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-
-    return (
-        <html lang="en">
-            <WorkoutLayout>{children}</WorkoutLayout>
-        </html>
-    );
+    return <WorkoutLayout>{children}</WorkoutLayout>;
 }
