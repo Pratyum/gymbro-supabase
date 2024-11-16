@@ -1,8 +1,8 @@
 import { db } from "@/utils/db/db";
 import {
-    InsertOrganization,
-    organizations,
-    usersTable,
+  InsertOrganization,
+  organizations,
+  usersTable,
 } from "@/utils/db/schema";
 import { createStripeCustomer } from "@/utils/stripe/api";
 import { createClient } from "@/utils/supabase/server";
@@ -10,7 +10,7 @@ import { and, eq } from "drizzle-orm";
 
 export const createOrganization = async (
   payload: Omit<InsertOrganization, "adminUserId" | "id">,
-  adminPhoneNumber: string
+  adminPhoneNumber: string,
 ) => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
@@ -23,7 +23,7 @@ export const createOrganization = async (
   }
   const stripeId = await createStripeCustomer(
     data?.user?.id!,
-    adminPhoneNumber
+    adminPhoneNumber,
   );
   const rows = await db
     .insert(usersTable)
@@ -54,7 +54,7 @@ export const createOrganization = async (
 
 export const updateOrganization = async (
   id: number,
-  payload: Partial<InsertOrganization>
+  payload: Partial<InsertOrganization>,
 ) => {
   await db.update(organizations).set(payload).where(eq(organizations.id, id));
   return { success: true };
@@ -76,9 +76,9 @@ export const getAllMembersForOrganization = async (organizationId: number) => {
 
 export const createMember = async (
   organizationId: number,
-  phoneNumber: string
+  phoneNumber: string,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     phone: phoneNumber,
     password: "example-password",
@@ -100,9 +100,9 @@ export const createMember = async (
 
 export const createMembersBatch = async (
   csvFile: File,
-  organizationId: number
+  organizationId: number,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   // Parse the csv file
   const text = await csvFile.text();
   const phoneNumbers = text.split("\n");
@@ -141,17 +141,17 @@ export const getAllAdminsForOrganization = async (organizationId: number) => {
     .where(
       and(
         eq(usersTable.organizationId, organizationId),
-        eq(usersTable.role, "admin")
-      )
+        eq(usersTable.role, "admin"),
+      ),
     );
   return { success: true, data: admins };
 };
 
 export const createAdmin = async (
   organizationId: number,
-  phoneNumber: string
+  phoneNumber: string,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     phone: phoneNumber,
     password: "example-password",

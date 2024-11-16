@@ -75,7 +75,7 @@ function SortableWorkoutPlanItemCard({
       });
       refreshWorkoutPlan();
     },
-    500
+    500,
   );
 
   const removeSet = async (workoutItemSetId: number) => {
@@ -139,12 +139,11 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
   } = useWorkoutPlan({ workoutPlanId });
   const router = useRouter();
 
-  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const addWorkoutPlanItem = async () => {
@@ -163,9 +162,11 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
     if (!over || active.id === over.id) {
       return;
     }
-    if(!workoutPlan?.items) return;
-    const oldIndex = workoutPlan.items.findIndex(item => item.id === active.id);
-    const newIndex = workoutPlan.items.findIndex(item => item.id === over.id);
+    if (!workoutPlan?.items) return;
+    const oldIndex = workoutPlan.items.findIndex(
+      (item) => item.id === active.id,
+    );
+    const newIndex = workoutPlan.items.findIndex((item) => item.id === over.id);
 
     const newItems = Array.from(workoutPlan.items);
     const [movedItem] = newItems.splice(oldIndex, 1);
@@ -176,13 +177,13 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
       ...item,
       order: index,
     }));
-    const promises = updatedItems.map((item , index) => {
-      if(item.id === workoutPlan.items[index].id) return Promise.resolve();
+    const promises = updatedItems.map((item, index) => {
+      if (item.id === workoutPlan.items[index].id) return Promise.resolve();
       return updateWorkoutPlanItemInDb({
         workoutPlan: item,
-        workoutPlanItemId: item.id
+        workoutPlanItemId: item.id,
       });
-    })
+    });
     const responses = await Promise.allSettled(promises);
     refetchWorkoutPlan();
   };
@@ -211,7 +212,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={(workoutPlan?.items ?? []).map((e) => ({id: e.id}))}
+          items={(workoutPlan?.items ?? []).map((e) => ({ id: e.id }))}
           strategy={verticalListSortingStrategy}
         >
           {(workoutPlan?.items ?? []).map((workoutPlanItem) => (
@@ -232,7 +233,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
         }}
         startDate={workoutPlan.startDate}
         onStartDateChange={async (date) => {
-          await updateWorkoutPlanInDb({ startDate: date })
+          await updateWorkoutPlanInDb({ startDate: date });
           refetchWorkoutPlan();
         }}
       />

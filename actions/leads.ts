@@ -15,7 +15,10 @@ export const createLeadForOrganization = async (payload: InsertLead) => {
   return { success: true };
 };
 
-export const updateLeadForOrganization = async (id: number, payload: Partial<InsertLead>) => {
+export const updateLeadForOrganization = async (
+  id: number,
+  payload: Partial<InsertLead>,
+) => {
   await db.update(leads).set(payload).where(eq(leads.id, id));
   return { success: true };
 };

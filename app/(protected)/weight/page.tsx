@@ -1,7 +1,6 @@
 import { getAllWeightLogs } from "@/actions/weight-log";
 import WeightLogPage from "@/components/weight-page";
 
-
 export const metadata = {
   title: "Weight Tracker",
   description: "Track your weight with ease",

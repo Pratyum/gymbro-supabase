@@ -1,9 +1,14 @@
 import { getUser } from "@/actions/weight-log";
 import {
-    addWorkoutPlanItemSet,
-    getWorkoutPlanById, removeWorkoutPlanItem, updateWorkoutPlanItem
+  addWorkoutPlanItemSet,
+  getWorkoutPlanById,
+  removeWorkoutPlanItem,
+  updateWorkoutPlanItem,
 } from "@/actions/workout-plan";
-import { InsertWorkoutPlanItem, InsertWorkoutPlanItemSet } from "@/utils/db/schema";
+import {
+  InsertWorkoutPlanItem,
+  InsertWorkoutPlanItemSet,
+} from "@/utils/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 
 // Helper function to check for access control in this file alone
@@ -18,13 +23,16 @@ async function doesUserHaveAccessToWorkoutPlan(id: number) {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { workoutPlanId: string; workoutPlanItemId: string } }
+  props: {
+    params: Promise<{ workoutPlanId: string; workoutPlanItemId: string }>;
+  },
 ) {
+  const params = await props.params;
   const { workoutPlanItemId, workoutPlanId } = params;
   const payload: Omit<InsertWorkoutPlanItem, "id" | "workoutPlanId"> =
     await request.json();
   const hasAccess = await doesUserHaveAccessToWorkoutPlan(
-    parseInt(workoutPlanId, 10)
+    parseInt(workoutPlanId, 10),
   );
   if (!hasAccess) {
     return NextResponse.json({
@@ -34,18 +42,21 @@ export async function PATCH(
   }
   const response = await updateWorkoutPlanItem(
     parseInt(workoutPlanItemId, 10),
-    payload
+    payload,
   );
   return NextResponse.json(response);
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { workoutPlanId: string; workoutPlanItemId: string } }
+  props: {
+    params: Promise<{ workoutPlanId: string; workoutPlanItemId: string }>;
+  },
 ) {
+  const params = await props.params;
   const { workoutPlanId, workoutPlanItemId } = params;
   const hasAccess = await doesUserHaveAccessToWorkoutPlan(
-    parseInt(workoutPlanId, 10)
+    parseInt(workoutPlanId, 10),
   );
   if (!hasAccess) {
     return NextResponse.json({
@@ -60,18 +71,17 @@ export async function DELETE(
 // Post method is for creating a new workout plan item set
 export async function POST(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: { workoutPlanId: string; workoutPlanItemId: string };
-  }
+  props: {
+    params: Promise<{ workoutPlanId: string; workoutPlanItemId: string }>;
+  },
 ) {
-  const { workoutPlanId , workoutPlanItemId } = params;
+  const params = await props.params;
+  const { workoutPlanId, workoutPlanItemId } = params;
   const payload: Omit<InsertWorkoutPlanItemSet, "id" | "workoutPlanItemId"> =
     await request.json();
 
   const hasAccess = await doesUserHaveAccessToWorkoutPlan(
-    parseInt(workoutPlanId, 10)
+    parseInt(workoutPlanId, 10),
   );
   if (!hasAccess) {
     return NextResponse.json({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 import {
   Dialog,
@@ -109,8 +109,9 @@ export default function AppointmentsCalendar() {
                 </CalendarViewTrigger>
 
                 <span className="flex-1" />
-
-                <CalendarCurrentDate />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <CalendarCurrentDate />
+                </Suspense>
 
                 <CalendarPrevTrigger>
                   <ChevronLeft size={20} />

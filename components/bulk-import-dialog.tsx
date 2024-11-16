@@ -3,13 +3,13 @@
 import { Upload } from "lucide-react";
 import { Button } from "./ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -94,7 +94,9 @@ export function BulkImportDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" variant="emerald">Upload and Import</Button>
+            <Button type="submit" variant="emerald">
+              Upload and Import
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

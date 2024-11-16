@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import Image from 'next/image'
-import { createClient } from '@/utils/supabase/client'
+import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
+import { createClient } from "@/utils/supabase/client";
 
 interface LazyLoadingSupabaseImageProps {
-  fullPath: string
-  alt: string
-  width: number
-  height: number
-  className?: string
-  skeleton?: React.ReactNode
+  fullPath: string;
+  alt: string;
+  width: number;
+  height: number;
+  className?: string;
+  skeleton?: React.ReactNode;
 }
 
 export default function LazyLoadingSupabaseImage({
@@ -18,32 +18,31 @@ export default function LazyLoadingSupabaseImage({
   alt,
   width,
   height,
-  className = '',
-  skeleton
+  className = "",
+  skeleton,
 }: LazyLoadingSupabaseImageProps) {
-
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const imageRef = useRef<HTMLDivElement>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
   const fetchImage = useCallback(async () => {
     try {
-      const bucketName = fullPath.split('/')[0];
-      const path = fullPath.split('/').slice(1).join('/');
+      const bucketName = fullPath.split("/")[0];
+      const path = fullPath.split("/").slice(1).join("/");
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .createSignedUrl(path, 60) // 60 seconds expiration
+        .createSignedUrl(path, 60); // 60 seconds expiration
 
-      if (error) throw error
+      if (error) throw error;
 
-      setImageUrl(data.signedUrl)
-      setIsLoading(false)
+      setImageUrl(data.signedUrl);
+      setIsLoading(false);
     } catch (error) {
-      console.error('Error fetching image:', error)
-      setError('Failed to load image')
-      setIsLoading(false)
+      console.error("Error fetching image:", error);
+      setError("Failed to load image");
+      setIsLoading(false);
     }
   }, [fullPath, supabase.storage]);
 
@@ -51,52 +50,50 @@ export default function LazyLoadingSupabaseImage({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          fetchImage()
-          observer.unobserve(entry.target)
+          fetchImage();
+          observer.unobserve(entry.target);
         }
       },
-      { rootMargin: '100px' }
-    )
+      { rootMargin: "100px" },
+    );
 
     const currentImageRef = imageRef.current;
     if (currentImageRef) {
-      observer.observe(currentImageRef)
+      observer.observe(currentImageRef);
     }
 
     return () => {
       if (currentImageRef) {
-        observer.unobserve(currentImageRef)
+        observer.unobserve(currentImageRef);
       }
-    }
+    };
   }, [fetchImage]);
 
   const DefaultSkeleton = () => (
-    <div 
-      className={`animate-pulse bg-gray-200 rounded ${className}`} 
+    <div
+      className={`animate-pulse bg-gray-200 rounded ${className}`}
       style={{ width, height }}
       aria-hidden="true"
     />
-  )
+  );
 
   if (error) {
-    return <div className="text-red-500">{error}</div>
+    return <div className="text-red-500">{error}</div>;
   }
 
   return (
     <div ref={imageRef}>
-      {isLoading ? (
-        skeleton || <DefaultSkeleton />
-      ) : (
-        imageUrl && (
-          <Image
-            src={imageUrl}
-            alt={alt}
-            width={width}
-            height={height}
-            className={className}
-          />
-        )
-      )}
+      {isLoading
+        ? skeleton || <DefaultSkeleton />
+        : imageUrl && (
+            <Image
+              src={imageUrl}
+              alt={alt}
+              width={width}
+              height={height}
+              className={className}
+            />
+          )}
     </div>
-  )
+  );
 }

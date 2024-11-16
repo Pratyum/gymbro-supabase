@@ -1,7 +1,8 @@
 import { getUser } from "@/actions/weight-log";
 import {
-    getWorkoutPlanById, removeWorkoutPlanItemSet,
-    updateWorkoutPlanItemSet
+  getWorkoutPlanById,
+  removeWorkoutPlanItemSet,
+  updateWorkoutPlanItemSet,
 } from "@/actions/workout-plan";
 import { InsertWorkoutPlanItemSet } from "@/utils/db/schema";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,21 +19,20 @@ async function doesUserHaveAccessToWorkoutPlan(id: number) {
 
 export async function PATCH(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       workoutPlanId: string;
       workoutPlanItemId: string;
       workoutPlanItemSetId: string;
-    };
-  }
+    }>;
+  },
 ) {
+  const params = await props.params;
   const { workoutPlanId, workoutPlanItemSetId } = params;
   const payload: Omit<InsertWorkoutPlanItemSet, "id" | "workoutPlanItemId"> =
     await request.json();
   const hasAccess = await doesUserHaveAccessToWorkoutPlan(
-    parseInt(workoutPlanId, 10)
+    parseInt(workoutPlanId, 10),
   );
   if (!hasAccess) {
     return NextResponse.json({
@@ -42,26 +42,25 @@ export async function PATCH(
   }
   const response = await updateWorkoutPlanItemSet(
     parseInt(workoutPlanItemSetId, 10),
-    payload
+    payload,
   );
   return NextResponse.json(response);
 }
 
 export async function DELETE(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       workoutPlanId: string;
       workoutPlanItemId: string;
       workoutPlanItemSetId: string;
-    };
-  }
+    }>;
+  },
 ) {
+  const params = await props.params;
   const { workoutPlanId, workoutPlanItemId, workoutPlanItemSetId } = params;
   const hasAccess = await doesUserHaveAccessToWorkoutPlan(
-    parseInt(workoutPlanId, 10)
+    parseInt(workoutPlanId, 10),
   );
   if (!hasAccess) {
     return NextResponse.json({
@@ -69,6 +68,8 @@ export async function DELETE(
       message: "You do not have access to this workout plan",
     });
   }
-  const response = await removeWorkoutPlanItemSet(parseInt(workoutPlanItemSetId, 10));
+  const response = await removeWorkoutPlanItemSet(
+    parseInt(workoutPlanItemSetId, 10),
+  );
   return NextResponse.json(response);
 }

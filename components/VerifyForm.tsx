@@ -1,12 +1,13 @@
 "use client";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { verifyOtp } from "@/app/auth/actions";
 import {
-    InputOTP,
-    InputOTPGroup,
-    InputOTPSeparator,
-    InputOTPSlot,
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
 } from "./ui/input-otp";
 
 export default function VerifyForm() {
@@ -14,7 +15,7 @@ export default function VerifyForm() {
     message: "",
   };
 
-  const [formState, formAction] = useFormState(verifyOtp, initialState);
+  const [formState, formAction] = useActionState(verifyOtp, initialState);
   const { pending } = useFormStatus();
 
   return (

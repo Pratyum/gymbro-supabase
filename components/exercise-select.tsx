@@ -30,7 +30,7 @@ export default function ExerciseSelect({
         `/api/exercise/search?query=${searchQuery}`,
         {
           credentials: "include",
-        }
+        },
       );
       const data = (await response.json()).data;
       return data as Exercise[];
@@ -42,7 +42,7 @@ export default function ExerciseSelect({
       value={String(exercise?.id)}
       onValueChange={(value) => {
         const selectedExercise = searchResults?.find(
-          (result) => String(result?.id) === value
+          (result) => String(result?.id) === value,
         );
         if (selectedExercise) {
           onExerciseChange(selectedExercise);

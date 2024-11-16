@@ -8,7 +8,7 @@ import { format } from "date-fns";
 
 // TODO: Move this to a utils function
 export async function getUser() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error,
@@ -36,7 +36,7 @@ export async function getAllWeightLogs() {
 
 export async function addWeightLog(
   currentState: { message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   if (formData.get("weight") === null || formData.get("date") === null) {
     return { message: "Please fill all the fields" };
@@ -46,18 +46,18 @@ export async function addWeightLog(
   try {
     const weight = formData.get("weight") as string;
     const date = formData.get("date") as string;
-    let payload : Omit<SelectWeightLog,'id'> = {
+    let payload: Omit<SelectWeightLog, "id"> = {
       userId: dbUser.id,
       weight: weight,
       date: new Date(date),
       photoUrl: null,
-    }
+    };
     // Upload photo if it exists in the form data
     if (formData.has("photo")) {
       const photo = formData.get("photo") as File;
       const isValidPhoto = photo && photo.size && photo.type.includes("image");
       if (isValidPhoto) {
-        const supabase = createClient();
+        const supabase = await createClient();
         const { data, error } = await supabase.storage
           .from("user-weight-log")
           .upload(
@@ -70,9 +70,9 @@ export async function addWeightLog(
                 user_id: user.id,
                 date: date,
               },
-            }
+            },
           );
-          payload.photoUrl = data?.fullPath ?? null;
+        payload.photoUrl = data?.fullPath ?? null;
         if (error) {
           return { message: error.message };
         }

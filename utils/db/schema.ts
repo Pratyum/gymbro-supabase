@@ -1,7 +1,13 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, pgEnum, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
-
-const RoleEnum = pgEnum('RoleEnum', ['admin', 'trainer', 'member']);
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  unique,
+} from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
@@ -11,7 +17,7 @@ export const usersTable = pgTable("users_table", {
   plan: text("plan").notNull(),
   stripe_id: text("stripe_id").notNull(),
   organizationId: integer("organization_id"),
-  role: RoleEnum('role').notNull().default('member'),
+  role: text("role").notNull().default("member"),
 });
 
 export const exercisesTable = pgTable("exercises", {
@@ -37,20 +43,23 @@ export const exercisesTable = pgTable("exercises", {
     .notNull()
     .default(sql`ARRAY[]::text[]`),
 });
-export const dayOfWeekEnum = pgEnum('day_of_week', [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday'
-])
+export const dayOfWeekEnum = pgEnum("day_of_week", [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+]);
 export const workoutPlan = pgTable("workout_plan", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => usersTable.id),
   friendlyName: text("friendly_name").notNull(),
-  frequency: dayOfWeekEnum('frequency').array().notNull().default(sql`ARRAY[]::day_of_week[]`),
+  frequency: dayOfWeekEnum("frequency")
+    .array()
+    .notNull()
+    .default(sql`ARRAY[]::day_of_week[]`),
   startDate: timestamp("start_date"),
 });
 
@@ -74,14 +83,14 @@ export const workoutPlanItemRelations = relations(
   workoutPlanItem,
   ({ many }) => ({
     sets: many(workoutPlanItemSet, { relationName: "workoutPlanItemId" }),
-  })
+  }),
 );
 
 export const workoutPlanItemSet = pgTable("workout_plan_item_set", {
   id: serial("id").primaryKey(),
   workoutPlanItemId: integer("workout_plan_item_id").references(
     () => workoutPlanItem.id,
-    { onDelete: "cascade" }
+    { onDelete: "cascade" },
   ),
   weight: text("weight").notNull(),
   reps: text("reps").notNull(),
@@ -102,7 +111,7 @@ export const workoutSessionRelations = relations(
   workoutSession,
   ({ many }) => ({
     sets: many(workoutSessionItemSetLog),
-  })
+  }),
 );
 
 export const workoutSessionItemSetLog = pgTable(
@@ -111,17 +120,17 @@ export const workoutSessionItemSetLog = pgTable(
     id: serial("id").primaryKey(),
     workoutSessionId: integer("workout_session_id").references(
       () => workoutSession.id,
-      { onDelete: "cascade" }
+      { onDelete: "cascade" },
     ),
     workoutPlanItemSetId: integer("workout_plan_item_set_id").references(
       () => workoutPlanItemSet.id,
-      { onDelete: "cascade" }
+      { onDelete: "cascade" },
     ),
     isCompleted: text("is_completed").notNull().default("false"),
     actualReps: text("actual_reps").notNull(),
     actualWeight: text("actual_weight"),
     actualRest: text("actual_rest"),
-  }
+  },
 );
 
 export const weightLog = pgTable("weight_log", {
@@ -133,7 +142,6 @@ export const weightLog = pgTable("weight_log", {
   date: timestamp("date").notNull().defaultNow(),
   photoUrl: text("photo_url"),
 });
-
 
 // Organizations
 export const organizations = pgTable("organizations", {
@@ -149,7 +157,7 @@ export const organizations = pgTable("organizations", {
   adminUserId: integer("admin_user_id").references(() => usersTable.id),
 });
 
-export const organizationUsersRelations =  relations(usersTable, ({ one }) => ({
+export const organizationUsersRelations = relations(usersTable, ({ one }) => ({
   organization: one(organizations, {
     relationName: "organizationId",
     fields: [usersTable.organizationId],
@@ -158,28 +166,50 @@ export const organizationUsersRelations =  relations(usersTable, ({ one }) => ({
 }));
 
 // Leads
-export const leads = pgTable("leads", {
+export const leads = pgTable(
+  "leads",
+  {
+    id: serial("id").primaryKey(),
+    source: text("source").notNull(),
+    status: text("status").notNull().default("new"),
+    name: text("name"),
+    email: text("email"),
+    phone: text("phone"),
+    notes: text("notes"),
+    organizationId: integer("organization_id").references(
+      () => organizations.id,
+    ),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => ({
+    unq: unique().on(t.id, t.name, t.organizationId, t.phone),
+  }),
+);
+
+// Social integrations
+export const socialIntegrations = pgTable("social_integrations", {
   id: serial("id").primaryKey(),
-  source: text("source").notNull(),
-  status: text("status").notNull().default('new'),
-  name: text("name"),
-  email: text("email"),
-  phone: text("phone"),
-  notes: text("notes"),
   organizationId: integer("organization_id").references(() => organizations.id),
+  platform: text("platform").notNull(), // 'facebook' or 'instagram'
+  accessToken: text("access_token").notNull(),
+  pageId: text("page_id").notNull(),
+  pageName: text("page_name").notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (t) => ({
-  unq: unique().on(t.id, t.name , t.organizationId, t.phone),
-}));
+});
+
 // Appointments Table
-export const appointments = pgTable('appointments', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => usersTable.id).notNull(),
-  trainerId: integer('trainer_id').references(() => usersTable.id),
-  startDate: timestamp('start_date'),
-  endDate: timestamp('end_date'),
-  notes: text('notes'),
+export const appointments = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => usersTable.id)
+    .notNull(),
+  trainerId: integer("trainer_id").references(() => usersTable.id),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  notes: text("notes"),
 });
 
 export const appointmentRelations = relations(appointments, ({ one }) => ({
@@ -218,6 +248,9 @@ export type SelectOrganization = typeof organizations.$inferSelect;
 
 export type InsertLead = typeof leads.$inferInsert;
 export type SelectLead = typeof leads.$inferSelect;
+
+export type InsertSocialIntegration = typeof socialIntegrations.$inferInsert;
+export type SelectSocialIntegration = typeof socialIntegrations.$inferSelect;
 
 export type InsertAppointment = typeof appointments.$inferInsert;
 export type SelectAppointment = typeof appointments.$inferSelect;

@@ -8,9 +8,9 @@ import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import { FaSpinner } from "react-icons/fa";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ export function AddWeightForm({
 }: {
   action: (
     state: { message: string },
-    formData: FormData
+    formData: FormData,
   ) => Promise<{ message: string }>;
 }) {
   const [date, setDate] = useState<Date>(new Date());
@@ -44,7 +44,7 @@ export function AddWeightForm({
     message: "",
   };
 
-  const [formState, formAction] = useFormState(action, initialState);
+  const [formState, formAction] = useActionState(action, initialState);
   const { pending } = useFormStatus();
   return (
     <form action={formAction} className="space-y-4">
@@ -114,7 +114,7 @@ export function AddWeightForm({
   );
 }
 
-export function AddWeightDialog({ open= false }: { open?: boolean }) {
+export function AddWeightDialog({ open = false }: { open?: boolean }) {
   const [isOpen, setIsOpen] = useState(open);
 
   const action = async (state: { message: string }, formData: FormData) => {

@@ -26,7 +26,7 @@ export function WorkoutFrequencyToggle({
     useState<DayOfWeek[]>(selectedDays);
   const toggleDay = (day: DayOfWeek) => {
     setInternalSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
   };
 

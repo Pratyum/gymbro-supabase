@@ -16,7 +16,7 @@ export const useWorkoutPlanItem = ({
         `/api/exercise/${workoutPlanItem.exerciseId}`,
         {
           credentials: "include",
-        }
+        },
       );
       const data = (await response.json()).data;
       return data as Exercise;
@@ -31,7 +31,7 @@ export const useWorkoutPlanItem = ({
           credentials: "include",
           method: "PATCH",
           body: JSON.stringify(payload),
-        }
+        },
       );
       const data = await response.json();
       return data;
@@ -51,7 +51,7 @@ export const useWorkoutPlanItem = ({
             reps: "10",
             rest: "30",
           }),
-        }
+        },
       );
       const data = await response.json();
       return data;
@@ -76,7 +76,7 @@ export const useWorkoutPlanItem = ({
             rest,
             weight,
           }),
-        }
+        },
       );
       const data = await response.json();
       return data;
@@ -91,7 +91,7 @@ export const useWorkoutPlanItem = ({
         {
           credentials: "include",
           method: "DELETE",
-        }
+        },
       );
       const data = await response.json();
       return data;

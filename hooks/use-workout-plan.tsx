@@ -68,7 +68,7 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
         {
           credentials: "include",
           method: "DELETE",
-        }
+        },
       );
       const data = await response.json();
       return data;
@@ -79,7 +79,7 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
   const { mutateAsync: updateWorkoutPlanItemInDb } = useMutation({
     mutationFn: async ({
       workoutPlanItemId,
-      workoutPlan
+      workoutPlan,
     }: {
       workoutPlanItemId: number;
       workoutPlan: Partial<WorkoutPlanItem>;
@@ -89,8 +89,8 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
         {
           credentials: "include",
           method: "PATCH",
-          body: JSON.stringify(workoutPlan)
-        }
+          body: JSON.stringify(workoutPlan),
+        },
       );
       const data = await response.json();
       return data;

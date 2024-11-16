@@ -3,22 +3,22 @@
 import { PlusCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "./ui/select";
 import { useState } from "react";
 type NewMemberDialogProps = {};

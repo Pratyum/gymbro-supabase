@@ -11,7 +11,8 @@ import {
   formatDistanceToNow,
   parseISO,
   isAfter,
-  format, addDays
+  format,
+  addDays,
 } from "date-fns";
 import Link from "next/link";
 import { getUser } from "@/actions/weight-log";
@@ -19,8 +20,10 @@ import { getWorkoutSessionForUser } from "@/actions/workout-session";
 
 export default async function WorkoutsOverview() {
   const now = new Date();
-  const {dbUser} = await getUser();
-  const {success , data : upcomingWorkouts} = await getWorkoutSessionForUser(dbUser.id);
+  const { dbUser } = await getUser();
+  const { success, data: upcomingWorkouts } = await getWorkoutSessionForUser(
+    dbUser.id,
+  );
   const workoutHistory = [
     {
       id: 1,
@@ -72,23 +75,30 @@ export default async function WorkoutsOverview() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-4">
-              {(upcomingWorkouts??[]).map((workout) => workout.plannedAt ? (
-                <li
-                  key={workout.id}
-                  className="flex items-center justify-between bg-white/40 p-3 rounded-lg shadow-sm"
-                >
-                  <span className="font-medium">{workout.workoutPlan?.friendlyName}</span>
-                  <span className="text-sm text-gray-500">
-                    {formatWorkoutTime(workout.plannedAt.toISOString())}
-                  </span>
-                </li>
-              ): null)}
+              {(upcomingWorkouts ?? []).map((workout) =>
+                workout.plannedAt ? (
+                  <li
+                    key={workout.id}
+                    className="flex items-center justify-between bg-white/40 p-3 rounded-lg shadow-sm"
+                  >
+                    <span className="font-medium">
+                      {workout.workoutPlan?.friendlyName}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {formatWorkoutTime(workout.plannedAt.toISOString())}
+                    </span>
+                  </li>
+                ) : null,
+              )}
             </ul>
           </CardContent>
         </Card>
 
         <div className="col-span-full flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild className="bg-green-500 hover:bg-green-600 text-white flex-1 py-6 text-lg transition-transform hover:scale-105">
+          <Button
+            asChild
+            className="bg-green-500 hover:bg-green-600 text-white flex-1 py-6 text-lg transition-transform hover:scale-105"
+          >
             <Link href={`/workouts/plan`}>
               <PlusIcon className="mr-2" />
               Plan Workout

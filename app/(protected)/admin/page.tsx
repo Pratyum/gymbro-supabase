@@ -1,12 +1,29 @@
-"use client"
+"use client";
 
-import { Bar, BarChart, Line, LineChart, ResponsiveContainer } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarDays, DollarSign, Users, Activity, BarChart as BarChartIcon } from "lucide-react"
-import { MembershipPage } from "@/components/membership-page"
-import { members } from "@/components/constants/memberships"
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CalendarDays,
+  DollarSign,
+  Users,
+  Activity,
+  BarChart as BarChartIcon,
+} from "lucide-react";
+import { MembershipPage } from "@/components/membership-page";
+import { members } from "@/components/constants/memberships";
+import TrainerPage from "@/components/trainer-page";
 
 // Simulated data
 const revenueData = [
@@ -16,7 +33,7 @@ const revenueData = [
   { name: "Apr", total: 2200 },
   { name: "May", total: 2400 },
   { name: "Jun", total: 2600 },
-]
+];
 
 const membershipData = [
   { name: "Jan", active: 100, new: 20 },
@@ -25,7 +42,7 @@ const membershipData = [
   { name: "Apr", active: 130, new: 28 },
   { name: "May", active: 140, new: 30 },
   { name: "Jun", active: 150, new: 32 },
-]
+];
 
 export default function GymAdminDashboard() {
   return (
@@ -41,12 +58,18 @@ export default function GymAdminDashboard() {
             <Users className="mr-2 h-4 w-4" />
             Members
           </TabsTrigger>
+          <TabsTrigger value="trainers">
+            <Users className="mr-2 h-4 w-4" />
+            Trainers
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card className="bg-gradient-to-br from-purple-400 to-purple-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Revenue
+                </CardTitle>
                 <DollarSign className="h-4 w-4" />
               </CardHeader>
               <CardContent>
@@ -56,7 +79,9 @@ export default function GymAdminDashboard() {
             </Card>
             <Card className="bg-gradient-to-br from-blue-400 to-blue-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Members</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Active Members
+                </CardTitle>
                 <Users className="h-4 w-4" />
               </CardHeader>
               <CardContent>
@@ -66,7 +91,9 @@ export default function GymAdminDashboard() {
             </Card>
             <Card className="bg-gradient-to-br from-green-400 to-green-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Daily Check-ins</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Avg. Daily Check-ins
+                </CardTitle>
                 <Activity className="h-4 w-4" />
               </CardHeader>
               <CardContent>
@@ -76,7 +103,9 @@ export default function GymAdminDashboard() {
             </Card>
             <Card className="bg-gradient-to-br from-orange-400 to-orange-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Retention Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Retention Rate
+                </CardTitle>
                 <CalendarDays className="h-4 w-4" />
               </CardHeader>
               <CardContent>
@@ -102,8 +131,12 @@ export default function GymAdminDashboard() {
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={revenueData}>
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar
+                        dataKey="total"
+                        fill="var(--color-total)"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -131,8 +164,18 @@ export default function GymAdminDashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={membershipData}>
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="active" stroke="var(--color-active)" strokeWidth={2} />
-                      <Line type="monotone" dataKey="new" stroke="var(--color-new)" strokeWidth={2} />
+                      <Line
+                        type="monotone"
+                        dataKey="active"
+                        stroke="var(--color-active)"
+                        strokeWidth={2}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="new"
+                        stroke="var(--color-new)"
+                        strokeWidth={2}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -143,7 +186,10 @@ export default function GymAdminDashboard() {
         <TabsContent value="members">
           <MembershipPage members={members} />
         </TabsContent>
+        <TabsContent value="trainers">
+          <TrainerPage />
+        </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

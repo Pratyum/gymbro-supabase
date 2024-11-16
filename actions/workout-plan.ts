@@ -24,10 +24,11 @@ export const getWorkoutPlanById = async (id: number) => {
     }
     const workoutData = res[0] as WorkoutPlan;
 
-    const resWorkoutItems = await db
+    const resWorkoutItems = (await db
       .select()
       .from(workoutPlanItem)
-      .where(eq(workoutPlanItem.workoutPlanId, id)).orderBy(workoutPlanItem.order) as WorkoutPlanItem[];
+      .where(eq(workoutPlanItem.workoutPlanId, id))
+      .orderBy(workoutPlanItem.order)) as WorkoutPlanItem[];
     if (!resWorkoutItems) {
       return {
         success: true,
@@ -40,10 +41,11 @@ export const getWorkoutPlanById = async (id: number) => {
 
     const workoutItemIds = resWorkoutItems.map((item) => item.id);
 
-    const resWorkoutItemSets = await db
+    const resWorkoutItemSets = (await db
       .select()
       .from(workoutPlanItemSet)
-      .where(inArray(workoutPlanItemSet.workoutPlanItemId, workoutItemIds)).orderBy(workoutPlanItemSet.id) as WorkoutPlanItemSet[];
+      .where(inArray(workoutPlanItemSet.workoutPlanItemId, workoutItemIds))
+      .orderBy(workoutPlanItemSet.id)) as WorkoutPlanItemSet[];
     if (!resWorkoutItemSets || !resWorkoutItemSets.length) {
       return {
         success: true,
@@ -58,7 +60,7 @@ export const getWorkoutPlanById = async (id: number) => {
       return {
         ...item,
         sets: resWorkoutItemSets.filter(
-          (set) => set.workoutPlanItemId === item.id
+          (set) => set.workoutPlanItemId === item.id,
         ),
       };
     });
@@ -96,7 +98,7 @@ export const createNewWorkoutPlan = async (payload: InsertWorkoutPlan) => {
 
 export const updateWorkoutPlan = async (
   id: number,
-  payload: Partial<InsertWorkoutPlan>
+  payload: Partial<InsertWorkoutPlan>,
 ) => {
   await db.update(workoutPlan).set(payload).where(eq(workoutPlan.id, id));
   return { success: true };
@@ -119,7 +121,7 @@ export const addWorkoutPlanItem = async (payload: InsertWorkoutPlanItem) => {
 
 export const updateWorkoutPlanItem = async (
   id: number,
-  payload: Partial<InsertWorkoutPlanItem>
+  payload: Partial<InsertWorkoutPlanItem>,
 ) => {
   await db
     .update(workoutPlanItem)
@@ -136,7 +138,7 @@ export const removeWorkoutPlanItem = async (id: number) => {
 // Workout Plan Item Set
 
 export const addWorkoutPlanItemSet = async (
-  payload: InsertWorkoutPlanItemSet
+  payload: InsertWorkoutPlanItemSet,
 ) => {
   const data = await db
     .insert(workoutPlanItemSet)
@@ -147,7 +149,7 @@ export const addWorkoutPlanItemSet = async (
 
 export const updateWorkoutPlanItemSet = async (
   id: number,
-  payload: Partial<InsertWorkoutPlanItemSet>
+  payload: Partial<InsertWorkoutPlanItemSet>,
 ) => {
   await db
     .update(workoutPlanItemSet)

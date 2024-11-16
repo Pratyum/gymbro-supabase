@@ -12,7 +12,7 @@ type SetInputsProps = {
   debouncedUpdateSet: (
     setId: number,
     field: keyof WorkoutPlanItemSet,
-    value: string
+    value: string,
   ) => void;
   removeSet: (workoutItemSetId: number) => void;
 };
@@ -29,7 +29,7 @@ export function SetInputs({
 
   const handleInputChange = (
     field: keyof WorkoutPlanItemSet,
-    value: string
+    value: string,
   ) => {
     switch (field) {
       case "reps":

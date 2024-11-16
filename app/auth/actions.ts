@@ -8,12 +8,68 @@ import { createStripeCustomer } from "@/utils/stripe/api";
 import { db } from "@/utils/db/db";
 import { usersTable } from "@/utils/db/schema";
 import { eq, or } from "drizzle-orm";
+import { getUser } from "@/actions/weight-log";
+
+// {role: "admin", email: "", name: "", phoneNumber:""}
+export async function inviteUser(
+  currentState: { message: string },
+  formData: FormData,
+) {
+  const supabase = await createClient();
+  const { dbUser: currentUser } = await getUser();
+  const email = formData.get("email") as string;
+  const phoneNumber = formData.get("phone_number") as string;
+  const role = formData.get("role") as "admin" | "trainer" | "member";
+  const name = formData.get("name") as string;
+  if (!email || !role) {
+    return { message: "Email and Role are required" };
+  }
+  // Email regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { message: "Invalid email" };
+  }
+
+  const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
+  if (error) {
+    return { message: error.message };
+  }
+  if (!data) {
+    return { message: "Error sending invite" };
+  }
+
+  const { user } = data;
+  const stripeId = await createStripeCustomer(
+    user!.id,
+    phoneNumber,
+    email,
+    name,
+  );
+  const rows = await db
+    .insert(usersTable)
+    .values({
+      email: email,
+      plan: "none",
+      role,
+      name,
+      phoneNumber,
+      stripe_id: stripeId,
+      organizationId: currentUser.organizationId,
+    })
+    .returning({ id: usersTable.id });
+
+  if (rows.length === 0) {
+    return { message: "Error creating user" };
+  }
+
+  return { message: "" };
+}
 
 export async function resetPassword(
   currentState: { message: string },
-  formData: FormData
+  formData: FormData,
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const passwordData = {
     password: formData.get("password") as string,
     confirm_password: formData.get("confirm_password") as string,
@@ -24,7 +80,7 @@ export async function resetPassword(
   }
 
   const { data } = await supabase.auth.exchangeCodeForSession(
-    passwordData.code
+    passwordData.code,
   );
 
   let { error } = await supabase.auth.updateUser({
@@ -38,9 +94,9 @@ export async function resetPassword(
 
 export async function forgotPassword(
   currentState: { message: string },
-  formData: FormData
+  formData: FormData,
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const email = formData.get("email") as string;
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/forgot-password/reset`,
@@ -53,10 +109,10 @@ export async function forgotPassword(
 }
 export async function signup(
   currentState: { message: string },
-  formData: FormData
+  formData: FormData,
 ) {
-  const supabase = createClient();
-  const cookiesStore = cookies();
+  const supabase = await createClient();
+  const cookiesStore = await cookies();
 
   if (formData.get("phoneNumber") as string) {
     // Sign up with phone number
@@ -98,10 +154,10 @@ export async function signup(
 
 export async function verifyOtp(
   currentState: { message: string },
-  formData: FormData
+  formData: FormData,
 ) {
-  const supabase = createClient();
-  const cookiesStore = cookies();
+  const supabase = await createClient();
+  const cookiesStore = await cookies();
   let error, data;
   const otpType = formData.get("type") as string;
   if (otpType === "sms") {
@@ -144,23 +200,21 @@ export async function verifyOtp(
       .where(
         or(
           eq(usersTable.phoneNumber, user!.phone!),
-          eq(usersTable.email, user!.email!)
-        )
+          eq(usersTable.email, user!.email!),
+        ),
       );
 
     if (checkUserInDB.length === 0) {
       // create Stripe Customer Record
       const stripeID = await createStripeCustomer(user!.id, user!.email!, "");
       // Create record in DB
-      await db
-        .insert(usersTable)
-        .values({
-          name: "",
-          phoneNumber: user!.phone!,
-          email: user!.email!,
-          stripe_id: stripeID,
-          plan: "none",
-        });
+      await db.insert(usersTable).values({
+        name: "",
+        phoneNumber: user!.phone!,
+        email: user!.email!,
+        stripe_id: stripeID,
+        plan: "none",
+      });
     }
   } catch (e) {
     console.error(e);
@@ -172,10 +226,10 @@ export async function verifyOtp(
 
 export async function loginUser(
   currentState: { message: string },
-  formData: FormData
+  formData: FormData,
 ) {
-  const supabase = createClient();
-  const cookiesStore = cookies();
+  const supabase = await createClient();
+  const cookiesStore = await cookies();
   let data, error;
   if (formData.get("phoneNumber") as string) {
     ({ error, data } = await supabase.auth.signInWithOtp({
@@ -207,13 +261,13 @@ export async function loginUser(
 }
 
 export async function logout() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.signOut();
   redirect("/login");
 }
 
 export async function signInWithGoogle() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -227,7 +281,7 @@ export async function signInWithGoogle() {
 }
 
 export async function signInWithGithub() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
