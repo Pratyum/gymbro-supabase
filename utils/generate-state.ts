@@ -1,3 +1,3 @@
 export function generateState() {
-  return crypto.randomUUID();
+    return crypto.randomUUID();
 }

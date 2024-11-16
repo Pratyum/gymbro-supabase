@@ -5,14 +5,14 @@ import WorkoutLayout from "@/components/layouts/workout-layout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Welcome to Gymbro",
-  description: "Track your workouts and nutrition with ease",
+    title: "Welcome to Gymbro",
+    description: "Track your workouts and nutrition with ease",
 };
 
 export default async function DashboardLayout({
-  children,
+    children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <WorkoutLayout>{children}</WorkoutLayout>;
+    return <WorkoutLayout>{children}</WorkoutLayout>;
 }
