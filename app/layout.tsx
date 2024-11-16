@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReactQueryClientProvider } from "@/components/providers/react-query";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
             <html lang="en">
                 {/* Required for pricing table */}
                 <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+                <Toaster />
                 <body className={inter.className}>{children}</body>
             </html>
         </ReactQueryClientProvider>
