@@ -11,6 +11,8 @@ import {
     ChevronRight,
     ChevronLeft,
 } from "lucide-react";
+import { WorkoutSessionWithPlan } from "@/types";
+import { SelectExercise } from "@/utils/db/schema";
 
 interface Exercise {
   name: string;
@@ -28,9 +30,86 @@ const exercises: Exercise[] = [
 
 type WorkoutPageProps = {
   sessionId: number;
+  workoutSession: WorkoutSessionWithPlan;
+  exerciseDataMap: Record<number, SelectExercise>;
 };
 
-export default function WorkoutPage({ sessionId }: WorkoutPageProps) {
+const StartWorkout = ({
+    friendlyName,
+    startWorkout,
+}: {
+  friendlyName?: string;
+  startWorkout: () => void;
+}) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-full flex flex-col items-center justify-center p-8"
+        >
+            <h1 className="text-5xl font-bold text-primary mb-8">
+                {friendlyName ?? "Session"}
+            </h1>
+            <Button
+                onClick={startWorkout}
+                className="py-4 px-8 text-2xl rounded-full"
+            >
+        Start Workout
+            </Button>
+        </motion.div>
+    );
+};
+
+const Timer = ({
+    timer,
+    toggleTimer,
+    isTimerRunning,
+    resetTimer,
+}: {
+    timer: number;
+    toggleTimer: () => void;
+    isTimerRunning: boolean;
+    resetTimer: () => void;
+}) => {
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    };
+
+    return (<div className="my-8 flex items-center gap-4 self-end">
+        <div className="text-4xl font-bold text-accent-foreground">
+            {formatTime(timer)}
+        </div>
+        <div>
+            <Button
+                onClick={toggleTimer}
+                variant="outline"
+                className="mr-4 bg-gray-800 hover:bg-gray-700 text-white"
+            >
+                {isTimerRunning ? (
+                    <PauseCircle size={24} />
+                ) : (
+                    <PlayCircle size={24} />
+                )}
+            </Button>
+            <Button
+                onClick={resetTimer}
+                variant="outline"
+                className="bg-gray-800 hover:bg-gray-700 text-white"
+            >
+                <RotateCcw size={24} />
+            </Button>
+        </div>
+    </div>)
+}
+
+export default function WorkoutPage({
+    sessionId,
+    workoutSession,
+    exerciseDataMap,
+}: WorkoutPageProps) {
     const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
     const [timer, setTimer] = useState(0);
@@ -93,11 +172,7 @@ export default function WorkoutPage({ sessionId }: WorkoutPageProps) {
         setActualReps(newActualReps);
     };
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-    };
+    
 
     const pageVariants = {
         initial: (direction: number) => ({
@@ -129,49 +204,18 @@ export default function WorkoutPage({ sessionId }: WorkoutPageProps) {
                 className="w-full h-full rounded-lg overflow-hidden flex flex-col"
             >
                 {!isWorkoutStarted ? (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="h-full flex flex-col items-center justify-center p-8"
-                    >
-                        <h1 className="text-5xl font-bold text-primary mb-8">
-              Workout Session
-                        </h1>
-                        <Button
-                            onClick={startWorkout}
-                            className="py-4 px-8 text-2xl rounded-full"
-                        >
-              Start Workout
-                        </Button>
-                    </motion.div>
+                    <StartWorkout
+                        friendlyName={workoutSession.workoutPlan?.friendlyName!}
+                        startWorkout={startWorkout}
+                    />
                 ) : (
                     <>
-                        <div className="my-8 flex items-center gap-4 self-end">
-                            <div className="text-4xl font-bold text-accent-foreground">
-                                {formatTime(timer)}
-                            </div>
-                            <div>
-                                <Button
-                                    onClick={toggleTimer}
-                                    variant="outline"
-                                    className="mr-4 bg-gray-800 hover:bg-gray-700 text-white"
-                                >
-                                    {isTimerRunning ? (
-                                        <PauseCircle size={24} />
-                                    ) : (
-                                        <PlayCircle size={24} />
-                                    )}
-                                </Button>
-                                <Button
-                                    onClick={resetWorkout}
-                                    variant="outline"
-                                    className="bg-gray-800 hover:bg-gray-700 text-white"
-                                >
-                                    <RotateCcw size={24} />
-                                </Button>
-                            </div>
-                        </div>
+                        <Timer
+                            timer={timer}
+                            toggleTimer={toggleTimer}
+                            isTimerRunning={isTimerRunning}
+                            resetTimer={resetWorkout}
+                        />
                         <AnimatePresence custom={direction} mode="wait">
                             <motion.div
                                 key={currentExerciseIndex}

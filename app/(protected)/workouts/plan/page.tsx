@@ -1,4 +1,4 @@
-import { getUser } from "@/actions/weight-log";
+import { getUser } from "@/actions/user";
 import { createNewWorkoutPlan } from "@/actions/workout-plan";
 import { redirect } from "next/navigation";
 

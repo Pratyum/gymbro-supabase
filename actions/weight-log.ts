@@ -1,28 +1,11 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/utils/db/db";
-import { SelectWeightLog, usersTable, weightLog } from "@/utils/db/schema";
+import { SelectWeightLog, weightLog } from "@/utils/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { format } from "date-fns";
-
-// TODO: Move this to a utils function
-export async function getUser() {
-    const supabase = await createClient();
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser();
-    if (!user) {
-        throw new Error("User not found");
-    }
-    const dbUser = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.phoneNumber, user.phone as string));
-
-    return { user, dbUser: dbUser[0] };
-}
+import { getUser } from "./user";
 
 export async function getAllWeightLogs() {
     const { dbUser, user } = await getUser();

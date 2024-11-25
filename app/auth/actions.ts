@@ -8,7 +8,7 @@ import { createStripeCustomer } from "@/utils/stripe/api";
 import { db } from "@/utils/db/db";
 import { usersTable } from "@/utils/db/schema";
 import { eq, or } from "drizzle-orm";
-import { getUser } from "@/actions/weight-log";
+import { getUser } from "@/actions/user";
 
 // {role: "admin", email: "", name: "", phoneNumber:""}
 export async function inviteUser(

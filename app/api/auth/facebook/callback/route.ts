@@ -1,4 +1,4 @@
-import { getUser } from "@/actions/weight-log";
+import { getUser } from "@/actions/user";
 import { db } from "@/utils/db/db";
 import { socialIntegrations } from "@/utils/db/schema";
 import { verifyState } from "@/utils/verify-state";

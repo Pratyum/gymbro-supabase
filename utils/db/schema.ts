@@ -127,7 +127,7 @@ export const workoutSessionItemSetLog = pgTable(
             { onDelete: "cascade" },
         ),
         isCompleted: text("is_completed").notNull().default("false"),
-        actualReps: text("actual_reps").notNull(),
+        actualReps: text("actual_reps"),
         actualWeight: text("actual_weight"),
         actualRest: text("actual_rest"),
     },

@@ -21,8 +21,11 @@ export default function RootLayout({
             <html lang="en">
                 {/* Required for pricing table */}
                 <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
-                <Toaster />
-                <body className={inter.className}>{children}</body>
+                
+                <body className={inter.className}>
+                    {children}
+                    <Toaster />
+                </body>
             </html>
         </ReactQueryClientProvider>
     );
