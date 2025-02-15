@@ -133,6 +133,20 @@ export const workoutSessionItemSetLog = pgTable(
     },
 );
 
+export const workoutSessionItemSetLogRelations = relations(
+    workoutSessionItemSetLog,
+    ({ one }) => ({
+        workoutSession: one(workoutSession, {
+            fields: [workoutSessionItemSetLog.workoutSessionId],
+            references: [workoutSession.id],
+        }),
+        workoutPlanItemSet: one(workoutPlanItemSet, {
+            fields: [workoutSessionItemSetLog.workoutPlanItemSetId],
+            references: [workoutPlanItemSet.id],
+        }),
+    }),
+);
+
 export const weightLog = pgTable("weight_log", {
     id: serial("id").primaryKey(),
     userId: integer("user_id")

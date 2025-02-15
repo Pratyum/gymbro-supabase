@@ -1,6 +1,11 @@
 import { getUser } from "@/actions/user";
 import { removeWorkoutPlanItemSet } from "@/actions/workout-plan";
-import { getWorkoutSessionById, updateWorkoutSessionItemForWorkoutSession } from "@/actions/workout-session";
+import {
+    getWorkoutSessionById,
+    getWorkoutSessionItemLogById,
+    getWorkoutSessionItemsForWorkoutSession,
+    updateWorkoutSessionItemForWorkoutSession,
+} from "@/actions/workout-session";
 import { WorkoutSessionItemLog } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,11 +19,13 @@ async function doesUserHaveAccessToWorkoutSession(id: number) {
     return true;
 }
 
-
-export async function DELETE(
+export async function GET(
     request: NextRequest,
     props: {
-    params: Promise<{ workoutSessionId: string; workoutSessionItemLogId: string }>;
+    params: Promise<{
+      workoutSessionId: string;
+      workoutSessionItemLogId: string;
+    }>;
   },
 ) {
     const params = await props.params;
@@ -32,14 +39,46 @@ export async function DELETE(
             message: "You do not have access to this workout session",
         });
     }
-    const response = await removeWorkoutPlanItemSet(parseInt(workoutSessionItemLogId, 10));
+
+    const response = await getWorkoutSessionItemLogById(
+        parseInt(workoutSessionId, 10),
+    );
+    return NextResponse.json(response);
+}
+
+export async function DELETE(
+    request: NextRequest,
+    props: {
+    params: Promise<{
+      workoutSessionId: string;
+      workoutSessionItemLogId: string;
+    }>;
+  },
+) {
+    const params = await props.params;
+    const { workoutSessionId, workoutSessionItemLogId } = params;
+    const hasAccess = await doesUserHaveAccessToWorkoutSession(
+        parseInt(workoutSessionId, 10),
+    );
+    if (!hasAccess) {
+        return NextResponse.json({
+            success: false,
+            message: "You do not have access to this workout session",
+        });
+    }
+    const response = await removeWorkoutPlanItemSet(
+        parseInt(workoutSessionItemLogId, 10),
+    );
     return NextResponse.json(response);
 }
 
 export async function PATCH(
     request: NextRequest,
     props: {
-    params: Promise<{ workoutSessionId: string; workoutSessionItemLogId: string }>;
+    params: Promise<{
+      workoutSessionId: string;
+      workoutSessionItemLogId: string;
+    }>;
   },
 ) {
     const params = await props.params;

@@ -7,12 +7,17 @@ import {
     WorkoutSessionItemLog,
 } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 
 type WorkoutSessionProps = {
   workoutSessionId: number;
 };
 
-export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => {
+export const useWorkoutSession = ({
+    workoutSessionId,
+}: WorkoutSessionProps) => {
+    const router = useRouter();
     const {
         data: workoutSession,
         isPending: isWorkoutSessionLoading,
@@ -23,7 +28,7 @@ export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => 
             const response = await fetch(`/api/workout-session/${workoutSessionId}`, {
                 credentials: "include",
             });
-            const data = (await response.json()).data;
+            const { data = null } = await response.json();
             return data as WorkoutSessionWithPlan;
         },
     });
@@ -42,12 +47,17 @@ export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => 
 
     // Workout Item Create
     const { mutateAsync: addWorkoutItemToDb } = useMutation({
-        mutationFn: async (payload:Omit<WorkoutSessionItemLog, "id" | "workoutSessionId">) => {
-            const response = await fetch(`/api/workout-session/${workoutSessionId}/item`, {
-                credentials: "include",
-                method: "POST",
-                body: JSON.stringify(payload),
-            });
+        mutationFn: async (
+            payload: Omit<WorkoutSessionItemLog, "id" | "workoutSessionId">,
+        ) => {
+            const response = await fetch(
+                `/api/workout-session/${workoutSessionId}/item`,
+                {
+                    credentials: "include",
+                    method: "POST",
+                    body: JSON.stringify(payload),
+                },
+            );
             const data = await response.json();
             return data;
         },
@@ -96,7 +106,9 @@ export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => 
 
     // Workout Session Item Log Create
     const { mutateAsync: addWorkoutSessionItemLogToDb } = useMutation({
-        mutationFn: async (payload: Omit<WorkoutSessionItemLog, "id" | "workoutSessionId">) => {
+        mutationFn: async (
+            payload: Omit<WorkoutSessionItemLog, "id" | "workoutSessionId">,
+        ) => {
             const response = await fetch(`/api/workout-session/${workoutSessionId}`, {
                 credentials: "include",
                 method: "POST",
@@ -148,6 +160,35 @@ export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => 
         },
     });
 
+    const exercises = useMemo(() => {
+        if (!workoutSession) {
+            return [];
+        }
+        return (
+            workoutSession.workoutPlan?.items
+                .map((item) => item.exerciseId ?? null)
+                .filter(Boolean) ?? []
+        );
+    }, [workoutSession]);
+    const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
+
+    const nextExercise = () => {
+        if (currentExerciseIndex === ((workoutSession?.workoutPlan?.items.length??0) - 1)) {
+            updateWorkoutSessionInDb({
+                completed: "true",
+            })
+            router.push("/workouts");
+            return;
+        }
+        setCurrentExerciseIndex((prev) => prev + 1);
+    };
+
+    const previousExercise = () => {
+        if (currentExerciseIndex === 0) {
+            return;
+        }
+        setCurrentExerciseIndex((prev) => prev - 1);
+    };
 
     // start workout session
     const startWorkoutSession = async () => {
@@ -155,14 +196,15 @@ export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => 
             startedAt: new Date(),
         });
         refetchWorkoutSession();
-        await addWorkoutItemToDb({
-            workoutPlanItemSetId: workoutSession?.workoutPlan?.items[0].sets[0].id!,
-            actualReps: '0',
-            actualWeight: '0',
-            actualRest: '0',
-            isCompleted: ""
+    };
+
+    const resetWorkoutSession = async () => {
+        await updateWorkoutSessionInDb({
+            startedAt: new Date(),
         });
-    }
+        setCurrentExerciseIndex(0);
+        refetchWorkoutSession();
+    };
 
     // log workout session item for workout session
 
@@ -183,5 +225,11 @@ export const useWorkoutSession = ({ workoutSessionId }: WorkoutSessionProps) => 
         addWorkoutSessionItemLogToDb,
         updateWorkoutSessionItemLogInDb,
         removeWorkoutSessionItemLogInDb,
+        exercises,
+        currentExerciseIndex,
+        nextExercise,
+        previousExercise,
+        startWorkoutSession,
+        resetWorkoutSession,
     };
 };

@@ -3,30 +3,18 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
     PlayCircle,
     PauseCircle,
     RotateCcw,
     ChevronRight,
-    ChevronLeft,
+    ChevronLeft
 } from "lucide-react";
 import { WorkoutSessionWithPlan } from "@/types";
 import { SelectExercise } from "@/utils/db/schema";
-
-interface Exercise {
-  name: string;
-  sets: number;
-  reps: number;
-}
-
-const exercises: Exercise[] = [
-    { name: "Push-ups", sets: 3, reps: 15 },
-    { name: "Squats", sets: 3, reps: 20 },
-    { name: "Lunges", sets: 3, reps: 12 },
-    { name: "Plank", sets: 3, reps: 30 },
-    { name: "Mountain Climbers", sets: 3, reps: 25 },
-];
+import { useWorkoutSession } from "@/hooks/use-workout-session";
+import { ExerciseNameBar } from "./exercise-name-bar";
+import { ExerciseRow } from "./exercise-row";
 
 type WorkoutPageProps = {
   sessionId: number;
@@ -67,10 +55,10 @@ const Timer = ({
     isTimerRunning,
     resetTimer,
 }: {
-    timer: number;
-    toggleTimer: () => void;
-    isTimerRunning: boolean;
-    resetTimer: () => void;
+  timer: number;
+  toggleTimer: () => void;
+  isTimerRunning: boolean;
+  resetTimer: () => void;
 }) => {
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -78,45 +66,66 @@ const Timer = ({
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     };
 
-    return (<div className="my-8 flex items-center gap-4 self-end">
-        <div className="text-4xl font-bold text-accent-foreground">
-            {formatTime(timer)}
+    return (
+        <div className="my-8 flex items-center gap-4 self-end">
+            <div className="text-4xl font-bold text-accent-foreground">
+                {formatTime(timer)}
+            </div>
+            <div>
+                <Button
+                    onClick={toggleTimer}
+                    variant="outline"
+                    className="mr-4 bg-gray-800 hover:bg-gray-700 text-white"
+                >
+                    {isTimerRunning ? (
+                        <PauseCircle size={24} />
+                    ) : (
+                        <PlayCircle size={24} />
+                    )}
+                </Button>
+                <Button
+                    onClick={resetTimer}
+                    variant="outline"
+                    className="bg-gray-800 hover:bg-gray-700 text-white"
+                >
+                    <RotateCcw size={24} />
+                </Button>
+            </div>
         </div>
-        <div>
-            <Button
-                onClick={toggleTimer}
-                variant="outline"
-                className="mr-4 bg-gray-800 hover:bg-gray-700 text-white"
-            >
-                {isTimerRunning ? (
-                    <PauseCircle size={24} />
-                ) : (
-                    <PlayCircle size={24} />
-                )}
-            </Button>
-            <Button
-                onClick={resetTimer}
-                variant="outline"
-                className="bg-gray-800 hover:bg-gray-700 text-white"
-            >
-                <RotateCcw size={24} />
-            </Button>
-        </div>
-    </div>)
-}
+    );
+};
 
 export default function WorkoutPage({
     sessionId,
     workoutSession,
     exerciseDataMap,
 }: WorkoutPageProps) {
+    const {
+        isWorkoutSessionLoading,
+        addWorkoutSessionItemLogToDb,
+        workoutSession: session,
+        startWorkoutSession,
+        exercises,
+        currentExerciseIndex,
+        resetWorkoutSession,
+        nextExercise,
+        previousExercise,
+    } = useWorkoutSession({
+        workoutSessionId: workoutSession.id,
+    });
+    const exercisesWithInfo = exercises.map((exerciseId: number) => {
+        return {
+            ...exerciseDataMap[exerciseId],
+            sets: workoutSession.workoutPlan?.items.find(
+                (item) => item.exerciseId === exerciseId,
+            )?.sets??[],
+        };
+    });
+    console.log({ session, exercises, exercisesWithInfo });
     const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
-    const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
     const [timer, setTimer] = useState(0);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
-    const [actualReps, setActualReps] = useState<number[][]>(
-        exercises.map((exercise) => Array(exercise.sets).fill(0)),
-    );
+
     const [direction, setDirection] = useState(0);
 
     useEffect(() => {
@@ -129,9 +138,9 @@ export default function WorkoutPage({
         return () => clearInterval(interval);
     }, [isTimerRunning]);
 
-    const startWorkout = () => {
+    const startWorkout = async () => {
         setIsWorkoutStarted(true);
-        setIsTimerRunning(true);
+        await startWorkoutSession();
     };
 
     const toggleTimer = () => {
@@ -140,26 +149,9 @@ export default function WorkoutPage({
 
     const resetWorkout = () => {
         setIsWorkoutStarted(false);
-        setCurrentExerciseIndex(0);
         setTimer(0);
         setIsTimerRunning(false);
-        setActualReps(exercises.map((exercise) => Array(exercise.sets).fill(0)));
-    };
-
-    const nextExercise = () => {
-        if (currentExerciseIndex < exercises.length - 1) {
-            setDirection(1);
-            setCurrentExerciseIndex(currentExerciseIndex + 1);
-        } else {
-            resetWorkout();
-        }
-    };
-
-    const prevExercise = () => {
-        if (currentExerciseIndex > 0) {
-            setDirection(-1);
-            setCurrentExerciseIndex(currentExerciseIndex - 1);
-        }
+        resetWorkoutSession();
     };
 
     const updateActualReps = (
@@ -167,12 +159,26 @@ export default function WorkoutPage({
         setIndex: number,
         value: number,
     ) => {
-        const newActualReps = [...actualReps];
-        newActualReps[exerciseIndex][setIndex] = value;
-        setActualReps(newActualReps);
+        if(!exercisesWithInfo[exerciseIndex].sets![setIndex].id) return;
+        addWorkoutSessionItemLogToDb({
+            workoutPlanItemSetId: exercisesWithInfo[exerciseIndex].sets![setIndex].id,
+            actualReps: value.toString(),
+            isCompleted: "true",
+        });
     };
 
-    
+    const updateActualWeight = (
+        exerciseIndex: number,
+        setIndex: number,
+        value: number,
+    ) => {
+        if(!exercisesWithInfo[exerciseIndex].sets![setIndex].id) return;
+        addWorkoutSessionItemLogToDb({
+            workoutPlanItemSetId: exercisesWithInfo[exerciseIndex].sets![setIndex].id,
+            actualWeight: value.toString(),
+            isCompleted: "true",
+        });
+    };
 
     const pageVariants = {
         initial: (direction: number) => ({
@@ -227,14 +233,11 @@ export default function WorkoutPage({
                                 transition={pageTransition}
                                 className="h-full flex flex-col p-8"
                             >
-                                <div className="text-center mb-8">
-                                    <h2 className="text-4xl font-bold">
-                                        {exercises[currentExerciseIndex].name}
-                                    </h2>
-                                </div>
+                                <ExerciseNameBar exercise={exercisesWithInfo[currentExerciseIndex]} />
                                 <div className="flex-grow space-y-6 overflow-auto">
                                     {Array.from({
-                                        length: exercises[currentExerciseIndex].sets,
+                                        length:
+                      exercisesWithInfo[currentExerciseIndex].sets?.length ?? 0,
                                     }).map((_, setIndex) => (
                                         <motion.div
                                             key={setIndex}
@@ -243,40 +246,34 @@ export default function WorkoutPage({
                                             transition={{ delay: setIndex * 0.1 }}
                                             className="flex items-center justify-between bg-slate-600 bg-opacity-30 p-4 rounded-lg"
                                         >
-                                            <span className="text-xl font-medium text-accent-foreground">
-                        Set {setIndex + 1}
-                                            </span>
-                                            <div className="flex items-center space-x-4">
-                                                <span className="text-lg text-accent-foreground">
-                          Expected: {exercises[currentExerciseIndex].reps}
-                                                </span>
-                                                <Input
-                                                    type="number"
-                                                    value={actualReps[currentExerciseIndex][setIndex]}
-                                                    onChange={(e) =>
-                                                        updateActualReps(
-                                                            currentExerciseIndex,
-                                                            setIndex,
-                                                            parseInt(e.target.value) || 0,
-                                                        )
-                                                    }
-                                                    className="w-24 text-center bg-gray-800 text-white text-lg"
-                                                    placeholder="Actual"
-                                                />
-                                            </div>
+                                            <ExerciseRow
+                                                setIndex={setIndex}
+                                                expectedWeight={parseInt(exercisesWithInfo[currentExerciseIndex].sets![setIndex].weight!, 10)}
+                                                actualWeight={parseInt(exercisesWithInfo[currentExerciseIndex].sets![setIndex].weight!, 10)}
+                                                expectedReps={parseInt(exercisesWithInfo[currentExerciseIndex].sets![setIndex].reps!, 10)} 
+                                                actualReps={parseInt(exercisesWithInfo[currentExerciseIndex].sets![setIndex].reps!,10)}
+                                                updateActualReps={(setIndex, value) => updateActualReps(currentExerciseIndex, setIndex, value)}
+                                                updateActualWeight={(setIndex, value) => updateActualWeight(currentExerciseIndex, setIndex, value)}
+                                            />
                                         </motion.div>
                                     ))}
                                 </div>
                                 <div className="flex justify-between mt-8">
                                     <Button
-                                        onClick={prevExercise}
+                                        onClick={() => {
+                                            previousExercise();
+                                            setDirection(-1);
+                                        }}
                                         disabled={currentExerciseIndex === 0}
                                         className="text-xl py-3 px-6"
                                     >
                                         <ChevronLeft className="mr-2" size={24} />
                     Previous
                                     </Button>
-                                    <Button onClick={nextExercise} className="text-xl py-3 px-6">
+                                    <Button onClick={() => {
+                                        nextExercise();
+                                        setDirection(1);
+                                    }} className="text-xl py-3 px-6">
                                         {currentExerciseIndex === exercises.length - 1
                                             ? "Finish"
                                             : "Next"}
@@ -299,6 +296,7 @@ export default function WorkoutPage({
                     />
                 )}
             </motion.div>
+            
         </div>
     );
 }
