@@ -1,7 +1,7 @@
 "use client";
 
 import { Upload } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
     Dialog,
     DialogContent,
@@ -10,9 +10,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+} from "../ui/dialog";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 import { useRef, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 

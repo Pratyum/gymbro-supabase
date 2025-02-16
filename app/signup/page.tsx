@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from 'next/link'
 import Image from 'next/image'
-import SignupForm from "@/components/SignupForm"
-import ProviderSigninBlock from "@/components/ProviderSigninBlock"
+import SignupForm from "@/components/auth/sign-up-form"
+import ProviderSigninBlock from "@/components/auth/sign-in-block"
 
 export default function Signup() {
     return (

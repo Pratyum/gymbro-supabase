@@ -1,8 +1,8 @@
-import StripePricingTable from "@/components/StripePricingTable";
+import StripePricingTable from "@/components/subscriptions/stripe-pricing-table";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import { createStripeCheckoutSession } from "@/utils/stripe/api";
-import DashboardHeaderProfileDropdown from "@/components/DashboardHeaderProfileDropdown";
+import DashboardHeaderProfileDropdown from "@/components/subscriptions/profile-dropdown";
 export default async function Subscribe() {
     const supabase = await createClient();
     const {

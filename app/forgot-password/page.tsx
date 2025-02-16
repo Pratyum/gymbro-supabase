@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import ForgotPasswordForm from '@/components/ForgotPasswordForm'
+import ForgotPasswordForm from '@/components/auth/forgot-password-form'
 export default function ForgotPassword() {
     return (
         <div className="flex items-center justify-center bg-muted min-h-screen" >

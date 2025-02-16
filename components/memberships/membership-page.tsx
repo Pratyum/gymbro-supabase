@@ -1,6 +1,6 @@
 "use client";
 
-import { BulkImportDialog } from "./bulk-import-dialog";
+import { BulkImportDialog } from "../common/bulk-import-dialog";
 import { NewMemberDialog } from "./new-member-dialog";
 import {
     Card,
@@ -8,7 +8,7 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 import {
     Table,
     TableBody,
@@ -16,8 +16,8 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "./ui/table";
-import { Button } from "./ui/button";
+} from "../ui/table";
+import { Button } from "../ui/button";
 
 type MembershipPageProps = {
   members: {

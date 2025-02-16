@@ -1,5 +1,5 @@
 import { members } from "@/components/constants/memberships";
-import { MembershipPage } from "@/components/membership-page";
+import { MembershipPage } from "@/components/memberships/membership-page";
 
 export default function MembershipsPage() {
     return (

@@ -1,4 +1,4 @@
-import { getUser } from "@/actions/weight-log";
+import { getUser } from "@/actions/user";
 import { createNewWorkoutPlan, getWorkoutPlansForUser } from "@/actions/workout-plan";
 import { InsertWorkoutPlan } from "@/utils/db/schema";
 import { NextRequest, NextResponse } from "next/server";

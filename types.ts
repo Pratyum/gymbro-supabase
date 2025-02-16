@@ -45,6 +45,15 @@ export type WorkoutPlanItemWithSets = WorkoutPlanItem & {
 export type WorkoutPlanWithItemsAndSets = WorkoutPlan & {
   items: WorkoutPlanItemWithSets[];
 };
+export type WorkoutSessionItemLog = {
+  id: number;
+  workoutSessionId: number | null;
+  workoutPlanItemSetId: number | null;
+  isCompleted: string;
+  actualReps?: string;
+  actualWeight?: string | null;
+  actualRest?: string | null;
+};
 
 export type WorkoutSession = {
   id: number;
@@ -54,6 +63,7 @@ export type WorkoutSession = {
   plannedAt?: Date;
   startedAt?: Date;
   completed: "true" | "false";
+  sets?: WorkoutSessionItemLog[];
 };
 
 export type WorkoutSessionWithPlan = WorkoutSession & {
@@ -71,7 +81,7 @@ export type Organization = {
   coverUrl?: string;
   description?: string;
   adminUserId: number;
-}
+};
 
 export type Leads = {
   id: number;
@@ -84,7 +94,7 @@ export type Leads = {
   organizationId: number;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type Appointment = {
   id: number;
@@ -93,4 +103,4 @@ export type Appointment = {
   startDate?: Date;
   endDate?: Date;
   notes?: string;
-}
+};

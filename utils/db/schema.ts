@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
     integer,
+    json,
     pgEnum,
     pgTable,
     serial,
@@ -127,10 +128,24 @@ export const workoutSessionItemSetLog = pgTable(
             { onDelete: "cascade" },
         ),
         isCompleted: text("is_completed").notNull().default("false"),
-        actualReps: text("actual_reps").notNull(),
+        actualReps: text("actual_reps"),
         actualWeight: text("actual_weight"),
         actualRest: text("actual_rest"),
     },
+);
+
+export const workoutSessionItemSetLogRelations = relations(
+    workoutSessionItemSetLog,
+    ({ one }) => ({
+        workoutSession: one(workoutSession, {
+            fields: [workoutSessionItemSetLog.workoutSessionId],
+            references: [workoutSession.id],
+        }),
+        workoutPlanItemSet: one(workoutPlanItemSet, {
+            fields: [workoutSessionItemSetLog.workoutPlanItemSetId],
+            references: [workoutPlanItemSet.id],
+        }),
+    }),
 );
 
 export const weightLog = pgTable("weight_log", {
@@ -164,6 +179,19 @@ export const organizationUsersRelations = relations(usersTable, ({ one }) => ({
         references: [organizations.id],
     }),
 }));
+
+
+export const memberships = pgTable("memberships", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").references(() => usersTable.id),
+    organizationId: integer("organization_id").references(() => organizations.id),
+    role: text("role").notNull().default("member"),
+    active: text("active").notNull().default("true"),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+    customData: json("custom_data").default("{}"),
+});
 
 // Leads
 export const leads = pgTable(
@@ -254,3 +282,6 @@ export type SelectSocialIntegration = typeof socialIntegrations.$inferSelect;
 
 export type InsertAppointment = typeof appointments.$inferInsert;
 export type SelectAppointment = typeof appointments.$inferSelect;
+
+export type InsertMembership = typeof memberships.$inferInsert;
+export type SelectMembership = typeof memberships.$inferSelect;

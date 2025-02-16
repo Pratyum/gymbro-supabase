@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from 'next/link'
 import Image from 'next/image'
 
-import ProviderSigninBlock from '@/components/ProviderSigninBlock'
-import LoginForm from "@/components/LoginForm"
+import ProviderSigninBlock from '@/components/auth/sign-in-block'
+import LoginForm from "@/components/auth/login-form"
 export default function Login() {
     return (
         <div className="flex items-center justify-center bg-muted min-h-screen">

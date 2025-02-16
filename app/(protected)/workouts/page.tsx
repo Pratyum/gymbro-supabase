@@ -6,6 +6,7 @@ import {
     HistoryIcon,
     PlusIcon,
     PlayIcon,
+    Timer,
 } from "lucide-react";
 import {
     formatDistanceToNow,
@@ -15,47 +16,75 @@ import {
     addDays,
 } from "date-fns";
 import Link from "next/link";
-import { getUser } from "@/actions/weight-log";
-import { getWorkoutSessionForUser } from "@/actions/workout-session";
+import { getUser } from "@/actions/user";
+import { getWorkoutSessionsForUser } from "@/actions/workout-session";
+import { Badge } from "@/components/ui/badge";
+import { WorkoutSessionWithPlan } from "@/types";
+
+const formatWorkoutTime = (dateTimeString: string) => {
+    const now = new Date();
+    const workoutDate = parseISO(dateTimeString);
+
+    if (isAfter(workoutDate, now)) {
+        const timeUntil = formatDistanceToNow(workoutDate, { addSuffix: true });
+        return `Starts ${timeUntil}`;
+    } else {
+        return format(workoutDate, "MMM d, yyyy 'at' h:mm a");
+    }
+};
+
+const UpcomingWorkoutCard = ({ workout } : {workout: WorkoutSessionWithPlan}) => {
+    return (<>
+    
+        <div className="flex items-center justify-between">
+            <span className="font-medium">
+                {workout.workoutPlan?.friendlyName}
+            </span>
+            <span className="text-sm text-gray-500">
+                {workout.plannedAt  && formatWorkoutTime(workout.plannedAt.toISOString())}
+            </span>
+        </div>
+        <div className="flex justify-between">
+            <Badge variant="secondary">
+                {workout.workoutPlan?.items.length} exercises
+            </Badge>
+            <Button variant="emerald" asChild className="flex gap-2">
+                <Link href={`/workouts/${workout.id}`}>
+                    Start now <Timer />
+                </Link>
+            </Button>
+        </div>
+    </>
+    )
+}
+
+const workoutHistory = (now : Date) => [
+    {
+        id: 1,
+        name: "Leg Day",
+        date: format(addDays(now, -2), "yyyy-MM-dd"),
+        duration: "45 min",
+    },
+    {
+        id: 2,
+        name: "Upper Body",
+        date: format(addDays(now, -4), "yyyy-MM-dd"),
+        duration: "50 min",
+    },
+    {
+        id: 3,
+        name: "Core Workout",
+        date: format(addDays(now, -7), "yyyy-MM-dd"),
+        duration: "30 min",
+    },
+];
 
 export default async function WorkoutsOverview() {
     const now = new Date();
     const { dbUser } = await getUser();
-    const { success, data: upcomingWorkouts } = await getWorkoutSessionForUser(
+    const { success, data: upcomingWorkouts } = await getWorkoutSessionsForUser(
         dbUser.id,
     );
-    const workoutHistory = [
-        {
-            id: 1,
-            name: "Leg Day",
-            date: format(addDays(now, -2), "yyyy-MM-dd"),
-            duration: "45 min",
-        },
-        {
-            id: 2,
-            name: "Upper Body",
-            date: format(addDays(now, -4), "yyyy-MM-dd"),
-            duration: "50 min",
-        },
-        {
-            id: 3,
-            name: "Core Workout",
-            date: format(addDays(now, -7), "yyyy-MM-dd"),
-            duration: "30 min",
-        },
-    ];
-
-    const formatWorkoutTime = (dateTimeString: string) => {
-        const workoutDate = parseISO(dateTimeString);
-
-        if (isAfter(workoutDate, now)) {
-            const timeUntil = formatDistanceToNow(workoutDate, { addSuffix: true });
-            return `Starts ${timeUntil}`;
-        } else {
-            return format(workoutDate, "MMM d, yyyy 'at' h:mm a");
-        }
-    };
-
     return (
         <div className="max-w-4xl mx-auto">
             <header className="text-center mb-8">
@@ -79,14 +108,10 @@ export default async function WorkoutsOverview() {
                                 workout.plannedAt ? (
                                     <li
                                         key={workout.id}
-                                        className="flex items-center justify-between bg-white/40 p-3 rounded-lg shadow-sm"
+                                        className="flex flex-col bg-white/40 p-3 rounded-lg shadow-sm"
                                     >
-                                        <span className="font-medium">
-                                            {workout.workoutPlan?.friendlyName}
-                                        </span>
-                                        <span className="text-sm text-gray-500">
-                                            {formatWorkoutTime(workout.plannedAt.toISOString())}
-                                        </span>
+
+                                        <UpcomingWorkoutCard key={workout.id} workout={workout} />
                                     </li>
                                 ) : null,
                             )}
@@ -119,10 +144,10 @@ export default async function WorkoutsOverview() {
                     </CardHeader>
                     <CardContent>
                         <ul className="space-y-4">
-                            {workoutHistory.map((workout) => (
+                            {workoutHistory(now).map((workout) => (
                                 <li
                                     key={workout.id}
-                                    className="flex items-center justify-between bg-white/40 p-3 rounded-lg shadow-sm"
+                                    className="flex items-center justify-between bg-slate/40 hover:bg-slate/60 p-3 rounded-lg shadow-sm"
                                 >
                                     <span className="font-medium">{workout.name}</span>
                                     <span className="text-sm text-gray-500">

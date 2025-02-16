@@ -64,7 +64,6 @@ export const getWorkoutPlanById = async (id: number) => {
                 ),
             };
         });
-
         return {
             success: true,
             data: {

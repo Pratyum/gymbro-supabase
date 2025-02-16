@@ -8,7 +8,7 @@ import {
     InputOTPGroup,
     InputOTPSeparator,
     InputOTPSlot,
-} from "./ui/input-otp";
+} from "../ui/input-otp";
 
 export default function VerifyForm() {
     const initialState = {

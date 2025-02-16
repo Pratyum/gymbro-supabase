@@ -1,15 +1,15 @@
 "use client";
 
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 import { useState } from "react";
-import LazyLoadingSupabaseImage from "./common/lazy-loading-supabase-image";
+import LazyLoadingSupabaseImage from "../common/lazy-loading-supabase-image";
 import { useQuery } from "@tanstack/react-query";
 import { Exercise } from "@/types";
 

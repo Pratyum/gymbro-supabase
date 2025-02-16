@@ -1,9 +1,9 @@
 "use server";
 import { db } from "@/utils/db/db";
 import { exercisesTable, SelectExercise } from "@/utils/db/schema";
-import { eq, ilike, or } from "drizzle-orm";
+import { eq, ilike, inArray, or } from "drizzle-orm";
 
-export async function searchExercises(query: string, limit = 10) {
+export async function searchExercises(query: string, limit = 10, offset = 0) {
     try {
         const exercises = await db
             .select()
@@ -20,10 +20,24 @@ export async function searchExercises(query: string, limit = 10) {
                 exercisesTable.equipment,
                 exercisesTable.mechanic,
             )
-            .limit(limit);
+            .limit(limit).offset(offset);
         return { success: true, data: exercises as SelectExercise[] };
     } catch (error) {
         console.error("Failed to search exercises:", error);
+        return { success: false };
+    }
+}
+
+
+export async function getExerciseByIds(ids: number[]) {
+    try {
+        const exercises = await db
+            .select()
+            .from(exercisesTable)
+            .where(inArray(exercisesTable.id, ids));
+        return { success: true, data: exercises as SelectExercise[] };
+    } catch (error) {
+        console.error("Failed to get exercises by ids:", error);
         return { success: false };
     }
 }

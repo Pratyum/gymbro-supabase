@@ -1,5 +1,5 @@
 import { getAllWeightLogs } from "@/actions/weight-log";
-import WeightLogPage from "@/components/weight-page";
+import WeightLogPage from "@/components/weight/weight-page";
 
 export const metadata = {
     title: "Weight Tracker",

@@ -1,9 +1,9 @@
 import { WorkoutPlanItemSet } from "@/types";
 import { useState } from "react";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { Trash } from "lucide-react";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 type SetInputsProps = {
   set: WorkoutPlanItemSet;
