@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { loginUser } from "@/app/auth/actions";
-import { PhoneInput } from "./ui/phone-number";
+import { PhoneInput } from "../ui/phone-number";
 export default function LoginForm() {
     const initialState = {
         message: "",

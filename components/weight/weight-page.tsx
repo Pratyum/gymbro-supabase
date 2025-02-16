@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { AddWeightDialog } from "./add-weight-form";
 import { format, formatDate } from "date-fns";
-import LazyLoadingSupabaseImage from "./common/lazy-loading-supabase-image";
+import LazyLoadingSupabaseImage from "../common/lazy-loading-supabase-image";
 import {
     Dialog,
     DialogContent,
@@ -19,9 +19,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import { Camera } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 type WeightLogPageProps = {
   weightData?: Array<{ date: Date; weight: string; photoUrl: string | null }>;
@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
-import { ResponsiveDrawer } from "./common/responsive-drawer";
+import { ResponsiveDrawer } from "../common/responsive-drawer";
 
 export const description = "A simple area chart";
 

@@ -15,9 +15,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { TeamSwitcher } from "../team-switcher";
+import { TeamSwitcher } from "./team-switcher";
 import { GalleryVerticalEnd } from "lucide-react";
-import { NavUser } from "../nav-user";
+import { NavUser } from "./nav-user";
 
 export const SidebarComponent = () => {
     const pathname = usePathname();

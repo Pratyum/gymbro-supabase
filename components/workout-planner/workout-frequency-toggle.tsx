@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Label } from "./ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import { Calendar as CalendarComponent } from "./ui/calendar";
+import { Label } from "../ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
+import { Calendar as CalendarComponent } from "../ui/calendar";
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
 import { DayOfWeek } from "@/types";

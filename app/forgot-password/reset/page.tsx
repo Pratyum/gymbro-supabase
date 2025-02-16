@@ -1,8 +1,7 @@
 
-import Link from 'next/link'
 import Image from 'next/image'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import ResetPasswordForm from '@/components/ResetPasswordForm'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import ResetPasswordForm from '@/components/auth/reset-password-form'
 export default function ResetPassword() {
     return (
         <div className="flex items-center justify-center bg-muted min-h-screen" >

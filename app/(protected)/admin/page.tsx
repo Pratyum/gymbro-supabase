@@ -21,9 +21,9 @@ import {
     Activity,
     BarChart as BarChartIcon,
 } from "lucide-react";
-import { MembershipPage } from "@/components/membership-page";
+import { MembershipPage } from "@/components/memberships/membership-page";
 import { members } from "@/components/constants/memberships";
-import TrainerPage from "@/components/trainer-page";
+import TrainerPage from "@/components/trainer/trainer-page";
 
 // Simulated data
 const revenueData = [

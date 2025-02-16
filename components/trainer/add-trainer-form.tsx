@@ -1,9 +1,9 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 import { useState, useActionState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { useFormStatus } from "react-dom";
@@ -14,8 +14,8 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "./ui/dialog";
-import { PhoneInput } from "./ui/phone-number";
+} from "../ui/dialog";
+import { PhoneInput } from "../ui/phone-number";
 import { inviteUser } from "@/app/auth/actions";
 import {
     Select,
@@ -23,7 +23,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 
 export function AddTrainerForm({
     action,

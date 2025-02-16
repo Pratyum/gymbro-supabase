@@ -1,4 +1,4 @@
-import WorkoutPlanner from "@/components/workout-planner";
+import WorkoutPlanner from "@/components/workout-planner/workout-planner";
 
 export default async function WorkoutPlanPage(props: {
   params: Promise<{

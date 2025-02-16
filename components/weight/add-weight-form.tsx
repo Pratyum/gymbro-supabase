@@ -1,18 +1,18 @@
 "use client";
 
 import { CalendarIcon, CameraIcon, Plus } from "lucide-react";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
-import { Calendar } from "./ui/calendar";
-import { Input } from "./ui/input";
+import { Calendar } from "../ui/calendar";
+import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useState, useActionState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { useFormStatus } from "react-dom";
 import { addWeightLog } from "@/actions/weight-log";
-import { ResponsiveDrawer } from "./common/responsive-drawer";
+import { ResponsiveDrawer } from "../common/responsive-drawer";
 
 export function AddWeightForm({
     action,

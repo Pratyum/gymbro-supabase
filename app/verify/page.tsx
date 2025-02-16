@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from 'next/link'
 import Image from 'next/image'
-import ProviderSigninBlock from "@/components/ProviderSigninBlock"
-import VerifyForm from "@/components/VerifyForm"
+import ProviderSigninBlock from "@/components/auth/sign-in-block"
+import VerifyForm from "@/components/auth/verify-otp-form"
 
 export default function Verify() {
     return (
