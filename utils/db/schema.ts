@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
     integer,
+    json,
     pgEnum,
     pgTable,
     serial,
@@ -179,6 +180,19 @@ export const organizationUsersRelations = relations(usersTable, ({ one }) => ({
     }),
 }));
 
+
+export const memberships = pgTable("memberships", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").references(() => usersTable.id),
+    organizationId: integer("organization_id").references(() => organizations.id),
+    role: text("role").notNull().default("member"),
+    active: text("active").notNull().default("true"),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+    customData: json("custom_data").default("{}"),
+});
+
 // Leads
 export const leads = pgTable(
     "leads",
@@ -268,3 +282,6 @@ export type SelectSocialIntegration = typeof socialIntegrations.$inferSelect;
 
 export type InsertAppointment = typeof appointments.$inferInsert;
 export type SelectAppointment = typeof appointments.$inferSelect;
+
+export type InsertMembership = typeof memberships.$inferInsert;
+export type SelectMembership = typeof memberships.$inferSelect;

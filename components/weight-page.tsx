@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
+import { ResponsiveDrawer } from "./common/responsive-drawer";
 
 export const description = "A simple area chart";
 
@@ -134,12 +135,30 @@ export default function WeightLogPage({ weightData = [] }: WeightLogPageProps) {
                                     >
                                         <span className="inline-flex gap-4 items-center">
                                             {format(log.date, "PPP")}
+                                            {
+                                                log.photoUrl && (
+                                                    <>
+                                                        <ResponsiveDrawer title="Photo" trigger={
+                                                            <Button variant="outline">
+                                                                <Camera />
+                                                            </Button>
+                                                        }>
+                                                            <div className="flex items-center flex-col">
+                                                                <LazyLoadingSupabaseImage
+                                                                    fullPath={log.photoUrl}
+                                                                    alt={format(log.date, "PPP")}
+                                                                    width={200}
+                                                                    height={200}
+                                                                />
+                                                            </div>
+                                                        </ResponsiveDrawer>
+                                                    </>
+                                                )
+                                            }
                                             {log.photoUrl && (
                                                 <Dialog>
                                                     <DialogTrigger asChild>
-                                                        <Button variant="outline">
-                                                            <Camera />
-                                                        </Button>
+                                                        
                                                     </DialogTrigger>
                                                     <DialogContent className="sm:max-w-[425px]">
                                                         <DialogHeader>

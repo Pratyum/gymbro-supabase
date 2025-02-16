@@ -63,6 +63,7 @@ export function AddTrainerForm({
                         required
                     />
                 </div>
+                <Input type="hidden" name="type" value="trainer" aria-hidden />
                 <div className="space-y-2">
                     <Label htmlFor="role">Role</Label>
                     <Select name="role">

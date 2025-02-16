@@ -29,8 +29,16 @@ export async function inviteUser(
     if (!emailRegex.test(email)) {
         return { message: "Invalid email" };
     }
-
-    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
+    
+    const { data, error } = await supabase.auth.admin.createUser({
+        phone: phoneNumber,
+        phone_confirm: true,
+        email: email,
+        user_metadata: {
+            full_name: name,
+            role: role,
+        }
+    });
     if (error) {
         return { message: error.message };
     }

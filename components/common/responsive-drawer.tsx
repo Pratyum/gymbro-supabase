@@ -6,35 +6,44 @@ import {
     DialogContent,
     DialogDescription,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
+    DialogTrigger
 } from "@/components/ui/dialog"
 import {
     Drawer,
     DrawerClose,
     DrawerContent, DrawerFooter,
     DrawerHeader,
-    DrawerTitle
+    DrawerTitle,
+    DrawerTrigger
 } from "@/components/ui/drawer"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
 export function ResponsiveDrawer({
     title,
+    trigger,
     children,
     open,
     setOpen,
     description = '',
 }:{
     title: string | React.ReactNode;
+    trigger?: React.ReactNode;
     description?: string | React.ReactNode;
     children: React.ReactNode;
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    open?: boolean;
+    setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const isDesktop = useMediaQuery("(min-width: 768px)")
+    const [internalOpen , setInternalOpen] = React.useState(open??false);
+    const uncontrolled = open === undefined;
 
     if (isDesktop) {
         return (
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={uncontrolled? internalOpen : open} onOpenChange={uncontrolled ? setInternalOpen : setOpen}>
+                {trigger && <DialogTrigger asChild>
+                    {trigger}
+                </DialogTrigger>}
                 <DialogContent className="flex flex-col">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
@@ -50,6 +59,9 @@ export function ResponsiveDrawer({
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
+            {trigger && <DrawerTrigger asChild>
+                {trigger}
+            </DrawerTrigger>}
             <DrawerContent>
                 <DrawerHeader className="text-left">
                     <DrawerTitle>{title}</DrawerTitle>

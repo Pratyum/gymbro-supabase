@@ -6,7 +6,7 @@ import {
     workoutSession,
     workoutSessionItemSetLog,
 } from "@/utils/db/schema";
-import { and, asc, eq, gt, inArray } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, not } from "drizzle-orm";
 import { getWorkoutPlanById, getWorkoutPlansForUser } from "./workout-plan";
 import {
     DayOfWeek,
@@ -144,7 +144,7 @@ export const getWorkoutSessionsForUser = async (userId: number) => {
     const workoutSessions = await db
         .select()
         .from(workoutSession)
-        .where(and(eq(workoutSession.userId, userId)))
+        .where(and(eq(workoutSession.userId, userId),not(eq(workoutSession.completed, "true"))))
         .orderBy(asc(workoutSession.plannedAt));
     if (!workoutSessions) {
         return { success: false, data: undefined };

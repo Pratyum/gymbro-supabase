@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, CameraIcon, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -11,15 +11,8 @@ import { cn } from "@/lib/utils";
 import { useState, useActionState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { useFormStatus } from "react-dom";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "./ui/dialog";
 import { addWeightLog } from "@/actions/weight-log";
+import { ResponsiveDrawer } from "./common/responsive-drawer";
 
 export function AddWeightForm({
     action,
@@ -47,7 +40,7 @@ export function AddWeightForm({
     const [formState, formAction] = useActionState(action, initialState);
     const { pending } = useFormStatus();
     return (
-        <form action={formAction} className="space-y-4">
+        <form action={formAction} className="max-md:mx-4 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="date">Date</Label>
@@ -84,14 +77,29 @@ export function AddWeightForm({
                     />
                 </div>
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col space-y-2">
                 <Label htmlFor="photo">Upload Photo (optional)</Label>
-                <Input
-                    name="photo"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                />
+                
+                <div className="flex items-center space-x-2">
+                    <Label htmlFor="camera" className="cursor-pointer inline-flex items-center">
+                        <CameraIcon className="mr-2 h-4 w-4" />
+                    Take Photo
+                    </Label>
+                    <Input
+                        name="camera"
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                    />
+                    <Input
+                        name="photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                    />
+                </div>
             </div>
             <Button type="submit" className="w-full" disabled={pending}>
                 {pending && (
@@ -126,21 +134,12 @@ export function AddWeightDialog({ open = false }: { open?: boolean }) {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline">Add Weight Log</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Add Weight Log</DialogTitle>
-                    <DialogDescription>
-            Add your weight log to track your progress
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <AddWeightForm action={action} />
-                </div>
-            </DialogContent>
-        </Dialog>
+        <>
+            <Button variant="outline" onClick={() => setIsOpen(true)}>Add Weight Log</Button>
+            <ResponsiveDrawer title="Add Weight Log" open={isOpen} setOpen={setIsOpen}>
+                <AddWeightForm action={action} />
+            </ResponsiveDrawer>
+        </>
     );
+
 }

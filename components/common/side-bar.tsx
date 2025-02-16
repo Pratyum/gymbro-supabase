@@ -6,20 +6,30 @@ import { adminTabs, tabs } from "../constants/tabs";
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
+    SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "../ui/sidebar";
+} from "@/components/ui/sidebar";
+import { TeamSwitcher } from "../team-switcher";
+import { GalleryVerticalEnd } from "lucide-react";
+import { NavUser } from "../nav-user";
 
 export const SidebarComponent = () => {
     const pathname = usePathname();
     const activeTab = tabs.find((tab) => tab.link === pathname)?.id;
     const renderSidebar = () => {
         return (
-            <Sidebar className="hidden lg:flex">
+            <Sidebar collapsible="icon" className="hidden lg:flex">
+                <SidebarHeader>
+                    <TeamSwitcher teams={[
+                        { name: "Acme Inc", logo: GalleryVerticalEnd, plan: "Enterprise" },
+                    ]} />
+                </SidebarHeader>
                 <SidebarContent>
                     <SidebarGroup>
                         <SidebarGroupLabel>Admin</SidebarGroupLabel>
@@ -62,6 +72,14 @@ export const SidebarComponent = () => {
                         </SidebarGroupContent>
                     </SidebarGroup>
                 </SidebarContent>
+
+                <SidebarFooter>
+                    <NavUser user={{
+                        name: "Pratyum",
+                        email: "pratyum96@gmail.com",
+                        avatar: "/avatars/pratyum.jpg",
+                    }} />
+                </SidebarFooter>
             </Sidebar>
         );
     };
