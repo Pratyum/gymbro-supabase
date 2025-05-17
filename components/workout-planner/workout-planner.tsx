@@ -155,15 +155,11 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
 
     // Local state for optimistic updates
     const [localItems, setLocalItems] = useState(workoutPlan?.items || []);
-    const [localFrequency, setLocalFrequency] = useState(workoutPlan?.frequency || []);
-    const [localStartDate, setLocalStartDate] = useState(workoutPlan?.startDate);
 
     // Update local state when data loads
     useMemo(() => {
         if (workoutPlan) {
             setLocalItems(workoutPlan.items || []);
-            setLocalFrequency(workoutPlan.frequency || []);
-            setLocalStartDate(workoutPlan.startDate);
         }
     }, [workoutPlan]);
 
@@ -370,16 +366,6 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
             method: "DELETE",
         });
     }, [workoutPlanId]);
-
-    const handleFrequencyChange = useCallback(async (days: any[]) => {
-        setLocalFrequency(days);
-        await updateWorkoutPlanInDb({ frequency: days });
-    }, [updateWorkoutPlanInDb]);
-
-    const handleStartDateChange = useCallback(async (date: Date | undefined) => {
-        setLocalStartDate(date);
-        await updateWorkoutPlanInDb({ startDate: date });
-    }, [updateWorkoutPlanInDb]);
 
     const finishPlanning = async () => {
         router.push(`/workouts`);
