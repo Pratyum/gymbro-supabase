@@ -24,7 +24,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SortableWorkoutPlanItemCard } from "./sortable-workout-plan-item-card";
 
 type WorkoutPlannerProps = {
@@ -48,7 +48,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
     const [localItems, setLocalItems] = useState(workoutPlan?.items || []);
 
     // Update local state when data loads
-    useMemo(() => {
+    useEffect(() => {
         if (workoutPlan) {
             setLocalItems(workoutPlan.items || []);
         }
@@ -289,7 +289,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
                     <AnimatePresence mode="popLayout">
                         {localItems.map((workoutPlanItem) => (
                             <SortableWorkoutPlanItemCard
-                                key={workoutPlanItem.id}
+                                key={`${workoutPlanItem.workoutPlanId}-${workoutPlanItem.exerciseId}-${workoutPlanItem.order}`}
                                 workoutPlanItem={workoutPlanItem}
                                 onExerciseChange={handleExerciseChange}
                                 onAddSet={handleAddSet}

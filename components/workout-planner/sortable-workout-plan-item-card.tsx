@@ -52,29 +52,26 @@ export function SortableWorkoutPlanItemCard({
 
     const handleAddSet = async () => {
         // Use the hook's function to add a set
-        const result = await addSetToDb();
-        if (result.success) {
-            onAddSet(workoutPlanItem.id);
-        }
+        onAddSet(workoutPlanItem.id);
+        await addSetToDb();
     };
 
     const handleUpdateSet = (setId: number, field: keyof WorkoutPlanItemSet, value: string) => {
+        // Also update local state
+        onUpdateSet(workoutPlanItem.id, setId, field, value);
+
         // Update the set in the database using the hook
         updateSetToDb({
             id: setId,
             [field]: value,
         });
 
-        // Also update local state
-        onUpdateSet(workoutPlanItem.id, setId, field, value);
     };
 
     const handleRemoveSet = async (setId: number) => {
+        onRemoveSet(workoutPlanItem.id, setId);
         // Remove the set from the database using the hook
         const result = await removeSetFromDb(setId);
-        if (result.success) {
-            onRemoveSet(workoutPlanItem.id, setId);
-        }
     };
 
     const handleRemoveItem = () => {
@@ -112,7 +109,7 @@ export function SortableWorkoutPlanItemCard({
                         <AnimatePresence mode="popLayout">
                             {memoizedWorkoutPlanItem.sets.map((set, setIndex) => (
                                 <motion.div
-                                    key={set.id}
+                                    key={`${set.workoutPlanItemId}-${setIndex+1}`}
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
