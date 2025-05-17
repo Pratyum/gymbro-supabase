@@ -1,9 +1,15 @@
 "use client";
 
-import { Plus, X, GripVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import useDebounce from "@/hooks/use-debounce";
+import { useWorkoutPlan } from "@/hooks/use-workout-plan";
+import { Exercise, WorkoutPlanItemSet } from "@/types";
 import {
-    DndContext,
     closestCenter,
+    DndContext,
+    DragEndEvent,
     KeyboardSensor,
     PointerSensor,
     useSensor,
@@ -12,184 +18,219 @@ import {
 import {
     SortableContext,
     sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-    useSortable,
+    verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ExerciseSelect from "./exercise-select";
-
-import { WorkoutFrequencyToggle } from "./workout-frequency-toggle";
-import { useWorkoutPlanItem } from "@/hooks/use-workout-plan-item";
-import { Exercise, WorkoutPlanItem, WorkoutPlanItemSet } from "@/types";
-import { useWorkoutPlan } from "@/hooks/use-workout-plan";
-import useDebounce from "@/hooks/use-debounce";
-import { SetInputs } from "./set-inputs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-type SortableWorkoutPlanItemCardProps = {
-  workoutPlanItem: WorkoutPlanItem & { sets: WorkoutPlanItemSet[] };
-  refreshWorkoutPlan: () => void;
-  removeWorkoutPlanItem: (workoutPlanItem: WorkoutPlanItem) => void;
-};
-function SortableWorkoutPlanItemCard({
-    workoutPlanItem,
-    refreshWorkoutPlan,
-    removeWorkoutPlanItem,
-}: SortableWorkoutPlanItemCardProps) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: workoutPlanItem.id });
-
-    const {
-        exerciseData,
-        addSetToDb,
-        updateSetToDb,
-        removeSetFromDb,
-        updateWorkoutPlanItemInDb,
-    } = useWorkoutPlanItem({ workoutPlanItem });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
-    const onExerciseChange = async (exercise: Exercise) => {
-        await updateWorkoutPlanItemInDb({
-            ...workoutPlanItem,
-            exerciseId: exercise.id,
-        });
-        refreshWorkoutPlan();
-    };
-
-    const addSet = async () => {
-        await addSetToDb();
-        refreshWorkoutPlan();
-    };
-
-    const updateSet = useDebounce(
-        async (setId: number, field: keyof WorkoutPlanItemSet, value: string) => {
-            await updateSetToDb({
-                id: setId,
-                [field]: value,
-            });
-            refreshWorkoutPlan();
-        },
-        500,
-    );
-
-    const removeSet = async (workoutItemSetId: number) => {
-        await removeSetFromDb(workoutItemSetId);
-        refreshWorkoutPlan();
-    };
-
-    return (
-        <Card className="mb-4" ref={setNodeRef} style={style}>
-            <CardHeader className="flex flex-row items-center">
-                <div {...attributes} {...listeners} className="mr-2 cursor-move">
-                    <GripVertical className="h-5 w-5 text-gray-500" />
-                </div>
-                <CardTitle className="flex-1">
-                    <ExerciseSelect
-                        exercise={exerciseData}
-                        onExerciseChange={onExerciseChange}
-                    />
-                </CardTitle>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeWorkoutPlanItem(workoutPlanItem)}
-                >
-                    <X className="h-4 w-4" />
-                </Button>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-2">
-                    {workoutPlanItem.sets.map((set, setIndex) => (
-                        <SetInputs
-                            removeSet={removeSet}
-                            setIndex={setIndex}
-                            workoutPlanItemId={workoutPlanItem.id}
-                            debouncedUpdateSet={updateSet}
-                            set={set}
-                            key={set.id}
-                        />
-                    ))}
-                </div>
-                <Button onClick={addSet} variant="outline" size="sm" className="mt-2">
-          Add Set
-                </Button>
-            </CardContent>
-        </Card>
-    );
-}
+import { useCallback, useEffect, useState } from "react";
+import { SortableWorkoutPlanItemCard } from "./sortable-workout-plan-item-card";
 
 type WorkoutPlannerProps = {
   workoutPlanId: number;
 };
+
 export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
+    const queryClient = useQueryClient();
+    const router = useRouter();
+    
     const {
         workoutPlan,
         isWorkoutPlanLoading,
         addWorkoutItemToDb,
-        refetchWorkoutPlan,
         updateWorkoutPlanInDb,
         updateWorkoutPlanItemInDb,
         removeWorkoutItemInDb,
     } = useWorkoutPlan({ workoutPlanId });
-    const router = useRouter();
+
+    // Local state for optimistic updates
+    const [localItems, setLocalItems] = useState(workoutPlan?.items || []);
+
+    // Update local state when data loads
+    useEffect(() => {
+        if (workoutPlan) {
+            setLocalItems(workoutPlan.items || []);
+        }
+    }, [workoutPlan]);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         }),
     );
 
-    const addWorkoutPlanItem = async () => {
-        await addWorkoutItemToDb();
-        refetchWorkoutPlan();
-    };
+    // Mutation for updating item order
+    const updateOrderMutation = useMutation({
+        mutationFn: async (updates: Array<{ id: number; order: number }>) => {
+            const promises = updates.map(({ id, order }) => 
+                updateWorkoutPlanItemInDb({
+                    workoutPlanItem: { order },
+                    workoutPlanItemId: id,
+                })
+            );
+            return Promise.all(promises);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["workout-plan", workoutPlanId] });
+        },
+    });
 
-    const removeWorkoutPlanItem = async (workoutPlanItem: WorkoutPlanItem) => {
-        await removeWorkoutItemInDb({ workoutPlanItemId: workoutPlanItem.id });
-        refetchWorkoutPlan();
-    };
+    // Optimistic handlers
+    const handleAddItem = useCallback(async () => {
+        const tempId = -Date.now(); // Temporary negative ID
+        const newItem = {
+            id: tempId,
+            workoutPlanId,
+            exerciseId: 900,
+            order: localItems.length,
+            sets: [],
+        };
 
-    const handleDragEnd = async (event: any) => {
+        // Optimistic update
+        setLocalItems(prev => [...prev, newItem]);
+
+        try {
+            const result = await addWorkoutItemToDb();
+            // Replace temp item with real item
+            if (result.success && result.data) {
+                setLocalItems(prev => 
+                    prev.map(item => item.id === tempId ? { ...item, id: result.data[0].id } : item)
+                );
+            }
+        } catch (error) {
+            // Revert on error
+            setLocalItems(prev => prev.filter(item => item.id !== tempId));
+        }
+    }, [localItems.length, workoutPlanId, addWorkoutItemToDb]);
+
+    const handleRemoveItem = useCallback((itemId: number) => {
+        // Optimistic update
+        setLocalItems(prev => prev.filter(item => item.id !== itemId));
+        
+        // API call
+        removeWorkoutItemInDb({ workoutPlanItemId: itemId }).catch(() => {
+            // Revert on error (refetch)
+            queryClient.invalidateQueries({ queryKey: ["workout-plan", workoutPlanId] });
+        });
+    }, [removeWorkoutItemInDb, queryClient, workoutPlanId]);
+
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event;
 
         if (!over || active.id === over.id) {
             return;
         }
-        if (!workoutPlan?.items) return;
-        const oldIndex = workoutPlan.items.findIndex(
-            (item) => item.id === active.id,
-        );
-        const newIndex = workoutPlan.items.findIndex((item) => item.id === over.id);
 
-        const newItems = Array.from(workoutPlan.items);
-        const [movedItem] = newItems.splice(oldIndex, 1);
-        newItems.splice(newIndex, 0, movedItem);
+        setLocalItems((items) => {
+            const oldIndex = items.findIndex((item) => item.id === active.id);
+            const newIndex = items.findIndex((item) => item.id === over.id);
 
-        // Update the order property for each item
-        const updatedItems = newItems.map((item, index) => ({
-            ...item,
-            order: index,
-        }));
-        const promises = updatedItems.map((item, index) => {
-            if (item.id === workoutPlan.items[index].id) return Promise.resolve();
-            return updateWorkoutPlanItemInDb({
-                workoutPlan: item,
-                workoutPlanItemId: item.id,
-            });
+            const newItems = [...items];
+            const [movedItem] = newItems.splice(oldIndex, 1);
+            newItems.splice(newIndex, 0, movedItem);
+
+            // Update order for all affected items
+            const updates = newItems.map((item, index) => ({
+                ...item,
+                order: index,
+            }));
+
+            // Batch update the order changes
+            const orderUpdates = updates
+                .filter((item, index) => item.order !== items[index]?.order)
+                .map(item => ({ id: item.id, order: item.order }));
+
+            if (orderUpdates.length > 0) {
+                updateOrderMutation.mutate(orderUpdates);
+            }
+
+            return updates;
         });
-        const responses = await Promise.allSettled(promises);
-        refetchWorkoutPlan();
-    };
+    }, [updateOrderMutation]);
+
+    // Local state update handlers
+    const handleExerciseChange = useCallback((itemId: number, exercise: Exercise) => {
+        setLocalItems(prev => 
+            prev.map(item => 
+                item.id === itemId ? { ...item, exerciseId: exercise.id } : item
+            )
+        );
+
+        // Debounced API call
+        updateWorkoutPlanItemInDb({
+            workoutPlanItem: { exerciseId: exercise.id },
+            workoutPlanItemId: itemId,
+        });
+    }, [updateWorkoutPlanItemInDb]);
+
+    const handleAddSet = useCallback((itemId: number) => {
+        const newSet = {
+            id: -Date.now(),
+            workoutPlanItemId: itemId,
+            weight: "10",
+            reps: "10",
+            rest: "30",
+        };
+
+        setLocalItems(prev =>
+            prev.map(item =>
+                item.id === itemId
+                    ? { ...item, sets: [...item.sets, newSet] }
+                    : item
+            )
+        );
+    }, []);
+
+    const handleUpdateSet = useCallback((itemId: number, setId: number, field: keyof WorkoutPlanItemSet, value: string) => {
+        // Optimistic update
+        setLocalItems(prev =>
+            prev.map(item =>
+                item.id === itemId
+                    ? {
+                        ...item,
+                        sets: item.sets.map(set =>
+                            set.id === setId ? { ...set, [field]: value } : set
+                        )
+                    }
+                    : item
+            )
+        );
+    }, []);
+
+    const handleRemoveSet = useCallback((itemId: number, setId: number) => {
+        // Optimistic update
+        setLocalItems(prev =>
+            prev.map(item =>
+                item.id === itemId
+                    ? { ...item, sets: item.sets.filter(set => set.id !== setId) }
+                    : item
+            )
+        );
+    }, []);
 
     const finishPlanning = async () => {
         router.push(`/workouts`);
+    };
+    const [planName, setPlanName] = useState("New Workout Plan");
+
+    useEffect(() => {
+        if (workoutPlan?.friendlyName) setPlanName(workoutPlan.friendlyName);
+    }, [workoutPlan?.friendlyName]);
+
+    const debouncedSaveName = useDebounce(async (name:string) => {
+        await updateWorkoutPlanInDb({ friendlyName: name });
+    }, 400);
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newName = e.target.value;
+        setPlanName(newName);
+        debouncedSaveName(newName);
     };
 
     if (isWorkoutPlanLoading) {
@@ -200,46 +241,78 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
         return <div>Workout Plan not found</div>;
     }
 
+
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Workout Planner</h1>
-            <Button onClick={addWorkoutPlanItem} className="mb-4">
-                <Plus className="mr-2 h-4 w-4" /> Add New Exercise
-            </Button>
+        <motion.div 
+            className="container mx-auto p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+        >
+            <motion.div 
+                className="flex flex-col md:flex-row md:items-center justify-between mb-6"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+            >
+                <div className="flex-1 mb-4 md:mb-0 md:mr-4">
+                    <Label htmlFor="plan-name" className="block text-sm font-medium mb-1">
+                        Workout Name
+                    </Label>
+                    <Input
+                        type="text"
+                        id="plan-name"
+                        value={planName}
+                        onChange={handleNameChange}
+                        className="w-full"
+                        placeholder="Enter workout plan name"
+                    />
+                </div>
+                <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    <Button onClick={handleAddItem} className="whitespace-nowrap">
+                        <Plus className="mr-2 h-4 w-4" /> Add Exercise
+                    </Button>
+                </motion.div>
+            </motion.div>
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
             >
                 <SortableContext
-                    items={(workoutPlan?.items ?? []).map((e) => ({ id: e.id }))}
+                    items={localItems.map(item => item.id)}
                     strategy={verticalListSortingStrategy}
                 >
-                    {(workoutPlan?.items ?? []).map((workoutPlanItem) => (
-                        <SortableWorkoutPlanItemCard
-                            key={workoutPlanItem.id}
-                            workoutPlanItem={workoutPlanItem}
-                            refreshWorkoutPlan={refetchWorkoutPlan}
-                            removeWorkoutPlanItem={removeWorkoutPlanItem}
-                        />
-                    ))}
+                    <AnimatePresence mode="popLayout">
+                        {localItems.map((workoutPlanItem) => (
+                            <SortableWorkoutPlanItemCard
+                                key={`${workoutPlanItem.workoutPlanId}-${workoutPlanItem.exerciseId}-${workoutPlanItem.order}`}
+                                workoutPlanItem={workoutPlanItem}
+                                onExerciseChange={handleExerciseChange}
+                                onAddSet={handleAddSet}
+                                onUpdateSet={handleUpdateSet}
+                                onRemoveSet={handleRemoveSet}
+                                onRemoveItem={handleRemoveItem}
+                            />
+                        ))}
+                    </AnimatePresence>
                 </SortableContext>
             </DndContext>
-            <WorkoutFrequencyToggle
-                selectedDays={workoutPlan.frequency}
-                onSelectedDaysChange={async (days) => {
-                    await updateWorkoutPlanInDb({ frequency: days });
-                    refetchWorkoutPlan();
-                }}
-                startDate={workoutPlan.startDate}
-                onStartDateChange={async (date) => {
-                    await updateWorkoutPlanInDb({ startDate: date });
-                    refetchWorkoutPlan();
-                }}
-            />
-            <Button onClick={finishPlanning} className="mt-6">
-        Finish Planning
-            </Button>
-        </div>
+            <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mt-6"
+            >
+                <Button onClick={finishPlanning} className="w-full sm:w-auto">
+                    Finish Planning
+                </Button>
+            </motion.div>
+        </motion.div>
     );
 }
