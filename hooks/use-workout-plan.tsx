@@ -169,10 +169,10 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
     const updateWorkoutPlanItemMutation = useMutation({
         mutationFn: async ({
             workoutPlanItemId,
-            workoutPlan,
+            workoutPlanItem,
         }: {
             workoutPlanItemId: number;
-            workoutPlan: Partial<WorkoutPlanItem>;
+            workoutPlanItem: Partial<WorkoutPlanItem>;
         }) => {
             const response = await fetch(
                 `/api/workout-plan/${workoutPlanId}/${workoutPlanItemId}`,
@@ -182,14 +182,14 @@ export const useWorkoutPlan = ({ workoutPlanId }: WorkoutPlanProps) => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(workoutPlan),
+                    body: JSON.stringify(workoutPlanItem),
                 },
             );
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Failed to update item");
             return data;
         },
-        onMutate: async ({ workoutPlanItemId, workoutPlan: updates }) => {
+        onMutate: async ({ workoutPlanItemId, workoutPlanItem: updates }) => {
             await queryClient.cancelQueries({ queryKey: ["workout-plan", workoutPlanId] });
             
             const previousWorkoutPlan = queryClient.getQueryData<WorkoutPlanWithItemsAndSets>(["workout-plan", workoutPlanId]);

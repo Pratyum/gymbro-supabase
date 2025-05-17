@@ -1,13 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useDebounce from "@/hooks/use-debounce";
 import { useWorkoutPlan } from "@/hooks/use-workout-plan";
-import { useWorkoutPlanItem } from "@/hooks/use-workout-plan-item";
-import { Exercise, WorkoutPlanItem, WorkoutPlanItemSet } from "@/types";
+import { Exercise, WorkoutPlanItemSet } from "@/types";
 import {
     closestCenter,
     DndContext,
@@ -20,121 +18,14 @@ import {
 import {
     SortableContext,
     sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+    verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { GripVertical, Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
-import ExerciseSelect from "./exercise-select";
-import { SetInputs } from "./set-inputs";
-
-type SortableWorkoutPlanItemCardProps = {
-  workoutPlanItem: WorkoutPlanItem & { sets: WorkoutPlanItemSet[] };
-  onExerciseChange: (itemId: number, exercise: Exercise) => void;
-  onAddSet: (itemId: number) => void;
-  onUpdateSet: (itemId: number, setId: number, field: keyof WorkoutPlanItemSet, value: string) => void;
-  onRemoveSet: (itemId: number, setId: number) => void;
-  onRemoveItem: (itemId: number) => void;
-};
-
-function SortableWorkoutPlanItemCard({
-    workoutPlanItem,
-    onExerciseChange,
-    onAddSet,
-    onUpdateSet,
-    onRemoveSet,
-    onRemoveItem,
-}: SortableWorkoutPlanItemCardProps) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: workoutPlanItem.id });
-
-    const { exerciseData } = useWorkoutPlanItem({ workoutPlanItem });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
-    const handleExerciseChange = (exercise: Exercise) => {
-        onExerciseChange(workoutPlanItem.id, exercise);
-    };
-
-    const handleAddSet = () => {
-        onAddSet(workoutPlanItem.id);
-    };
-
-    const handleUpdateSet = (setId: number, field: keyof WorkoutPlanItemSet, value: string) => {
-        onUpdateSet(workoutPlanItem.id, setId, field, value);
-    };
-
-    const handleRemoveSet = (setId: number) => {
-        onRemoveSet(workoutPlanItem.id, setId);
-    };
-
-    const handleRemoveItem = () => {
-        onRemoveItem(workoutPlanItem.id);
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        >
-            <Card className="mb-4" ref={setNodeRef} style={style}>
-                <CardHeader className="flex flex-row items-center">
-                    <div {...attributes} {...listeners} className="mr-2 cursor-move">
-                        <GripVertical className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <CardTitle className="flex-1">
-                        <ExerciseSelect
-                            exercise={exerciseData}
-                            onExerciseChange={handleExerciseChange}
-                        />
-                    </CardTitle>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRemoveItem}
-                    >
-                        <X className="h-4 w-4" />
-                    </Button>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        <AnimatePresence mode="popLayout">
-                            {workoutPlanItem.sets.map((set, setIndex) => (
-                                <motion.div
-                                    key={set.id}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <SetInputs
-                                        removeSet={() => handleRemoveSet(set.id)}
-                                        setIndex={setIndex}
-                                        workoutPlanItemId={workoutPlanItem.id}
-                                        debouncedUpdateSet={(setId, field, value) => handleUpdateSet(setId, field, value)}
-                                        set={set}
-                                    />
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-                    <Button onClick={handleAddSet} variant="outline" size="sm" className="mt-2">
-                        Add Set
-                    </Button>
-                </CardContent>
-            </Card>
-        </motion.div>
-    );
-}
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { SortableWorkoutPlanItemCard } from "./sortable-workout-plan-item-card";
 
 type WorkoutPlannerProps = {
   workoutPlanId: number;
@@ -179,7 +70,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
         mutationFn: async (updates: Array<{ id: number; order: number }>) => {
             const promises = updates.map(({ id, order }) => 
                 updateWorkoutPlanItemInDb({
-                    workoutPlan: { order },
+                    workoutPlanItem: { order },
                     workoutPlanItemId: id,
                 })
             );
@@ -273,7 +164,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
 
         // Debounced API call
         updateWorkoutPlanItemInDb({
-            workoutPlan: { exerciseId: exercise.id },
+            workoutPlanItem: { exerciseId: exercise.id },
             workoutPlanItemId: itemId,
         });
     }, [updateWorkoutPlanItemInDb]);
@@ -294,43 +185,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
                     : item
             )
         );
-
-        // API call
-        fetch(`/api/workout-plan/${workoutPlanId}/${itemId}`, {
-            method: "POST",
-            body: JSON.stringify({
-                weight: "10",
-                reps: "10",
-                rest: "30",
-            }),
-        }).then(res => res.json()).then(data => {
-            if (data.success) {
-                // Update with real ID
-                setLocalItems(prev =>
-                    prev.map(item =>
-                        item.id === itemId
-                            ? {
-                                ...item,
-                                sets: item.sets.map(set =>
-                                    set.id === newSet.id ? { ...set, id: data.data[0].id } : set
-                                )
-                            }
-                            : item
-                    )
-                );
-            }
-        });
-    }, [workoutPlanId]);
-
-    const debouncedUpdateSet = useDebounce(
-        async (itemId: number, setId: number, field: keyof WorkoutPlanItemSet, value: string) => {
-            fetch(`/api/workout-plan/${workoutPlanId}/${itemId}/${setId}`, {
-                method: "PATCH",
-                body: JSON.stringify({ [field]: value }),
-            });
-        },
-        500
-    );
+    }, []);
 
     const handleUpdateSet = useCallback((itemId: number, setId: number, field: keyof WorkoutPlanItemSet, value: string) => {
         // Optimistic update
@@ -346,10 +201,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
                     : item
             )
         );
-
-        // Debounced API call
-        debouncedUpdateSet(itemId, setId, field, value);
-    }, [debouncedUpdateSet]);
+    }, []);
 
     const handleRemoveSet = useCallback((itemId: number, setId: number) => {
         // Optimistic update
@@ -360,24 +212,26 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
                     : item
             )
         );
-
-        // API call
-        fetch(`/api/workout-plan/${workoutPlanId}/${itemId}/${setId}`, {
-            method: "DELETE",
-        });
-    }, [workoutPlanId]);
+    }, []);
 
     const finishPlanning = async () => {
         router.push(`/workouts`);
     };
-    const [planName, setPlanName] = useState(workoutPlan?.friendlyName || "New Workout Plan");
-    
-    const handleNameChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [planName, setPlanName] = useState("New Workout Plan");
+
+    useEffect(() => {
+        if (workoutPlan?.friendlyName) setPlanName(workoutPlan.friendlyName);
+    }, [workoutPlan?.friendlyName]);
+
+    const debouncedSaveName = useDebounce(async (name:string) => {
+        await updateWorkoutPlanInDb({ friendlyName: name });
+    }, 400);
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newName = e.target.value;
         setPlanName(newName);
-        
-        await updateWorkoutPlanInDb({ friendlyName: newName });
-    }, [updateWorkoutPlanInDb]);
+        debouncedSaveName(newName);
+    };
 
     if (isWorkoutPlanLoading) {
         return <div>Loading...</div>;
@@ -429,7 +283,7 @@ export default function WorkoutPlanner({ workoutPlanId }: WorkoutPlannerProps) {
                 onDragEnd={handleDragEnd}
             >
                 <SortableContext
-                    items={localItems.map(item => ({ id: item.id }))}
+                    items={localItems.map(item => item.id)}
                     strategy={verticalListSortingStrategy}
                 >
                     <AnimatePresence mode="popLayout">
