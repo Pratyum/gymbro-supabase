@@ -52,6 +52,13 @@ export async function getAllTrainers() {
 // Get all clients without a trainer
 export async function getUnassignedClients() {
     try {
+        const { dbUser } = await getUser();
+        
+        // Ensure user has access to organization clients
+        if (!dbUser.organizationId && dbUser.role !== "admin") {
+            return { success: false, message: "No organization access" };
+        }
+
         // Get clients that are not in trainer_clients table
         const clientsWithTrainers = await db
             .select({ clientId: trainerClients.clientId })
@@ -59,15 +66,16 @@ export async function getUnassignedClients() {
 
         const clientIds = clientsWithTrainers.map(c => c.clientId).filter(Boolean) as number[];
 
+        const whereConditions = [
+            eq(usersTable.role, "member"),
+            ...(dbUser.organizationId ? [eq(usersTable.organizationId, dbUser.organizationId)] : []),
+            ...(clientIds.length > 0 ? [not(inArray(usersTable.id, clientIds))] : [])
+        ];
+
         const unassignedClients = await db
             .select()
             .from(usersTable)
-            .where(and(
-                eq(usersTable.role, "member"),
-                clientIds.length > 0
-                    ? not(inArray(usersTable.id, clientIds))
-                    : undefined
-            ));
+            .where(and(...whereConditions));
 
         return { success: true, data: unassignedClients };
     } catch (error) {

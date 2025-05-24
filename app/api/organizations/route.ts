@@ -1,18 +1,20 @@
-import { NextResponse } from 'next/server';
 import {
-
-    getUserOrganizations,
     createOrganization,
-    updateOrganization,
-    deleteOrganization
+    deleteOrganization,
+    getOrganization,
+    updateOrganization
 } from '@/actions/organizations';
 import { getUser } from '@/actions/user';
 import { InsertOrganization } from '@/utils/db/schema';
+import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
     try {
         const {dbUser} = await getUser();
-        const {success, data} = await getUserOrganizations(dbUser.id);
+        if(!dbUser.organizationId){
+            return NextResponse.json({ success: false, error: 'User is not part of an organization' }, { status: 400 });
+        }
+        const { data, success } = await getOrganization(dbUser.organizationId);
         return NextResponse.json({ success: success, organizations: data });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message || 'GET error' }, { status: 500 });

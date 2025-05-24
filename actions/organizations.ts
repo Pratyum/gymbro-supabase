@@ -8,6 +8,18 @@ import { createStripeCustomer } from "@/utils/stripe/api";
 import { createClient } from "@/utils/supabase/server";
 import { and, eq } from "drizzle-orm";
 
+
+export const getOrganization = async (id: number) => {
+    const organization = await db
+        .select()
+        .from(organizations)
+        .where(eq(organizations.id, id));
+    if (organization.length === 0) {
+        return { success: false, error: "Organization not found" };
+    }
+    return { success: true, data: organization[0] };
+};
+
 export const createOrganization = async (
     payload: Omit<InsertOrganization, "adminUserId" | "id">,
     adminPhoneNumber: string,
