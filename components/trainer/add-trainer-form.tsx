@@ -1,12 +1,11 @@
 "use client";
 
+import { InviteUserParams, useInvite } from "@/hooks/use-invite";
+import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { useState, useActionState } from "react";
+import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
-import { useFormStatus } from "react-dom";
+import { Button } from "../ui/button";
 import {
     Dialog,
     DialogContent,
@@ -15,8 +14,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { PhoneInput } from "../ui/phone-number";
-import { inviteUser } from "@/app/auth/actions";
 import {
     Select,
     SelectContent,
@@ -25,33 +25,70 @@ import {
     SelectValue,
 } from "../ui/select";
 
-export function AddTrainerForm({
-    action,
-}: {
-  action: (
-    state: { message: string },
-    formData: FormData,
-  ) => Promise<{ message: string }>;
-}) {
-    const initialState = {
-        message: "",
+export function AddTrainerForm() {
+    const queryClient = useQueryClient();
+    const [formData, setFormData] = useState<InviteUserParams>({
+        name: "",
+        email: "",
+        phone_number: "",
+        role: "trainer",
+    });
+
+    const { inviteUser, isInviting } = useInvite();
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const [formState, formAction] = useActionState(action, initialState);
-    const { pending } = useFormStatus();
+    const handleSelectChange = (value: string) => {
+        setFormData(prev => ({ ...prev, role: value as InviteUserParams["role"] }));
+    };
+
+    const handlePhoneChange = (value: string) => {
+        setFormData(prev => ({ ...prev, phone_number: value }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await inviteUser(formData);
+            // Reset form after successful invite
+            setFormData({
+                name: "",
+                email: "",
+                phone_number: "",
+                role: "trainer",
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["trainers"],
+            });
+        } catch (error) {
+            // Error handling is already done in the hook
+        }
+    };
+
     return (
-        <form action={formAction} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input name="name" type="text" placeholder="Enter your name" />
+                    <Input
+                        name="name"
+                        type="text"
+                        placeholder="Enter name"
+                        value={formData.name}
+                        onChange={handleChange}
+                    />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
                         name="email"
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="Enter email"
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                     />
                 </div>
@@ -60,13 +97,18 @@ export function AddTrainerForm({
                     <PhoneInput
                         placeholder="+919444489090"
                         name="phone_number"
+                        value={formData.phone_number}
+                        onChange={handlePhoneChange}
                         required
                     />
                 </div>
-                <Input type="hidden" name="type" value="trainer" aria-hidden />
                 <div className="space-y-2">
                     <Label htmlFor="role">Role</Label>
-                    <Select name="role">
+                    <Select
+                        name="role"
+                        value={formData.role}
+                        onValueChange={handleSelectChange}
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="Select Role" />
                         </SelectTrigger>
@@ -82,38 +124,25 @@ export function AddTrainerForm({
                 variant="emerald"
                 type="submit"
                 className="w-full"
-                disabled={pending}
+                disabled={isInviting}
             >
-                {pending && (
+                {isInviting ? (
                     <>
-                        <FaSpinner className="animate-spin mr-2" /> Loading
+                        <FaSpinner className="animate-spin mr-2" /> Sending Invitation...
                     </>
-                )}
-                {!pending && (
+                ) : (
                     <>
                         <Plus className="mr-2 h-4 w-4" /> Add New Trainer
                     </>
                 )}
             </Button>
-            {formState?.message && (
-                <p className="text-sm text-red-500 text-center py-2">
-                    {formState.message}
-                </p>
-            )}
         </form>
     );
 }
 
+
 export function AddTrainerDialog({ open = false }: { open?: boolean }) {
     const [isOpen, setIsOpen] = useState(open);
-
-    const action = async (state: { message: string }, formData: FormData) => {
-        const response = await inviteUser(state, formData);
-        if (!response.message) {
-            setIsOpen(false);
-        }
-        return { message: response.message };
-    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -126,7 +155,7 @@ export function AddTrainerDialog({ open = false }: { open?: boolean }) {
                     <DialogDescription>Add a trainer to your gym</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <AddTrainerForm action={action} />
+                    <AddTrainerForm />
                 </div>
             </DialogContent>
         </Dialog>

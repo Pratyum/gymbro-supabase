@@ -15,13 +15,84 @@ import {
 export const usersTable = pgTable("users_table", {
     id: serial("id").primaryKey(),
     name: text("name").notNull(),
-    phoneNumber: text("phone_number").notNull().unique(),
+    phoneNumber: text("phone_number"),
     email: text("email"),
     plan: text("plan").notNull(),
     stripe_id: text("stripe_id").notNull(),
     organizationId: integer("organization_id"),
     role: text("role").notNull().default("member"),
 });
+
+export const trainerClients = pgTable("trainer_clients", {
+    id: serial("id").primaryKey(),
+    trainerId: integer("trainer_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    clientId: integer("client_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    assignedAt: timestamp("assigned_at").defaultNow(),
+    notes: text("notes"),
+});
+
+// Trainer tasks
+export const trainerTasks = pgTable("trainer_tasks", {
+    id: serial("id").primaryKey(),
+    trainerId: integer("trainer_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    clientId: integer("client_id").references(() => usersTable.id, { onDelete: "set null" }),
+    dueDate: timestamp("due_date"),
+    priority: text("priority").notNull().default("medium"), // low, medium, high
+    status: text("status").notNull().default("pending"), // pending, in_progress, completed
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const trainerTaskRelations = relations(trainerTasks, ({ one }) => ({
+    trainer: one(usersTable, {
+        fields: [trainerTasks.trainerId],
+        references: [usersTable.id],
+    }),
+    client: one(usersTable, {
+        fields: [trainerTasks.clientId],
+        references: [usersTable.id],
+    }),
+}));
+
+// Trainer sessions (for scheduling)
+export const trainerSessions = pgTable("trainer_sessions", {
+    id: serial("id").primaryKey(),
+    trainerId: integer("trainer_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    clientId: integer("client_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    start: timestamp("start").notNull(),
+    end: timestamp("end").notNull(),
+    location: text("location"),
+    notes: text("notes"),
+    status: text("status").notNull().default("scheduled"), // scheduled, confirmed, canceled, completed
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const trainerSessionRelations = relations(trainerSessions, ({ one }) => ({
+    trainer: one(usersTable, {
+        fields: [trainerSessions.trainerId],
+        references: [usersTable.id],
+    }),
+    client: one(usersTable, {
+        fields: [trainerSessions.clientId],
+        references: [usersTable.id],
+    }),
+}));
+
+
+// Add to usersTable relations
+export const userTrainerRelations = relations(usersTable, ({ many }) => ({
+    clients: many(trainerClients, { relationName: "trainer" }),
+    trainers: many(trainerClients, { relationName: "client" }),
+    clientAssignments: many(trainerClients, { relationName: "client" }),
+    trainerAssignments: many(trainerClients, { relationName: "trainer" }),
+    trainerTasks: many(trainerTasks),
+    clientTasks: many(trainerTasks, { relationName: "client" }),
+    trainerSessions: many(trainerSessions),
+    clientSessions: many(trainerSessions, { relationName: "client" }),
+}));
 
 export const exercisesTable = pgTable("exercises", {
     id: serial("id").primaryKey(),
@@ -333,6 +404,15 @@ export type SelectDailyGoalLog = typeof dailyGoalLogs.$inferSelect;
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
 
+export type InsertTrainerClient = typeof trainerClients.$inferInsert;
+export type SelectTrainerClient = typeof trainerClients.$inferSelect;
+
+export type InsertTrainerTask = typeof trainerTasks.$inferInsert;
+export type SelectTrainerTask = typeof trainerTasks.$inferSelect;
+
+export type InsertTrainerSession = typeof trainerSessions.$inferInsert;
+export type SelectTrainerSession = typeof trainerSessions.$inferSelect;
+
 export type InsertExercise = typeof exercisesTable.$inferInsert;
 export type SelectExercise = typeof exercisesTable.$inferSelect;
 
@@ -349,9 +429,9 @@ export type InsertWorkoutSession = typeof workoutSession.$inferInsert;
 export type SelectWorkoutSession = typeof workoutSession.$inferSelect;
 
 export type InsertWorkoutSessionItemSetLog =
-  typeof workoutSessionItemSetLog.$inferInsert;
+    typeof workoutSessionItemSetLog.$inferInsert;
 export type SelectWorkoutSessionItemSetLog =
-  typeof workoutSessionItemSetLog.$inferSelect;
+    typeof workoutSessionItemSetLog.$inferSelect;
 
 export type InsertWeightLog = typeof weightLog.$inferInsert;
 export type SelectWeightLog = typeof weightLog.$inferSelect;
