@@ -46,9 +46,9 @@
     "next": "15.0.3",
     "next-themes": "^0.4.3",
     "postgres": "^3.4.5",
-    "react": "19.0.0-rc-66855b96-20241106",
+    "react": "^18.3.1",
     "react-day-picker": "8.10.1",
-    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "^18.3.1",
     "react-hotkeys-hook": "^4.6.1",
     "react-icons": "^5.3.0",
     "react-phone-number-input": "^3.4.9",
@@ -63,8 +63,8 @@
   "devDependencies": {
     "@faker-js/faker": "^9.2.0",
     "@types/node": "^20.17.6",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.0.3",
@@ -76,11 +76,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
-  "packageManager": "pnpm@9.7.0+sha256.b35018fbfa8f583668b2649e407922a721355cd81f61beeb4ac1d4258e585559",
-  "pnpm": {
-    "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
-  }
+  "packageManager": "pnpm@9.7.0+sha256.b35018fbfa8f583668b2649e407922a721355cd81f61beeb4ac1d4258e585559"
 }

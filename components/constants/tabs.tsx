@@ -3,6 +3,7 @@ import {
     Calendar,
     ChartNetwork,
     Dumbbell,
+    LayoutDashboard,
     Scale,
     User,
     Utensils,
@@ -11,7 +12,7 @@ import {
 export type TABS = "weight" | "nutrition" | "workouts" | "profile";
 
 export const adminTabs = [
-    { id: "dashboard", label: "Dashboard", icon: Scale, link: "/admin" },
+    { id: "trainers", label: "Trainers", icon: Dumbbell, link: "/admin/trainers" },
     { id: "members", label: "Members", icon: User, link: "/admin/members" },
     { id: "sales", label: "Sales", icon: Building, link: "/admin/sales" },
     { id: "leads", label: "Leads", icon: ChartNetwork, link: "/admin/leads" },
@@ -22,6 +23,10 @@ export const adminTabs = [
         link: "/admin/schedule",
     },
 ];
+export const trainerTabs = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, link: "/trainer/dashboard" },
+    { id: "sessions", label: "Members", icon: Calendar, link: "/trainer/schedule" },
+]
 export const tabs = [
     { id: "weight", label: "Weight log", icon: Scale, link: "/weight" },
     { id: "nutrition", label: "Nutrition", icon: Utensils, link: "/nutrition" },

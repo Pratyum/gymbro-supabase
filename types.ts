@@ -1,3 +1,6 @@
+import { Session, User } from "@supabase/supabase-js";
+import { SelectUser } from "./utils/db/schema";
+
 export enum DayOfWeek {
   sunday = "sunday",
   monday = "monday",
@@ -103,4 +106,12 @@ export type Appointment = {
   startDate?: Date;
   endDate?: Date;
   notes?: string;
+};
+
+export type AuthUser = {
+  supabaseUser: User | null;
+  dbUser: SelectUser | null;
+  session: Session | null;
+  isLoading: boolean;
+  error: Error | null;
 };
