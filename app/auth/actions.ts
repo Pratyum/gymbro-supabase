@@ -1,21 +1,21 @@
 "use server";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { EmailOtpType } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import { createStripeCustomer } from "@/utils/stripe/api";
+import { getUser } from "@/actions/user";
 import { db } from "@/utils/db/db";
 import { usersTable } from "@/utils/db/schema";
+import { createStripeCustomer } from "@/utils/stripe/api";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { AdminUserAttributes, EmailOtpType } from "@supabase/supabase-js";
 import { eq, or } from "drizzle-orm";
-import { getUser } from "@/actions/user";
+import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 // {role: "admin", email: "", name: "", phoneNumber:""}
 export async function inviteUser(
     currentState: { message: string },
     formData: FormData,
 ) {
-    const supabase = await createClient();
+    const supabase = await createServiceRoleClient();
     const { dbUser: currentUser } = await getUser();
     const email = formData.get("email") as string;
     const phoneNumber = formData.get("phone_number") as string;
@@ -29,16 +29,16 @@ export async function inviteUser(
     if (!emailRegex.test(email)) {
         return { message: "Invalid email" };
     }
-    
-    const { data, error } = await supabase.auth.admin.createUser({
-        phone: phoneNumber,
-        phone_confirm: true,
+    const attributes: AdminUserAttributes = {
+        ...(phoneNumber && {phone: phoneNumber}),
         email: email,
         user_metadata: {
+            ...(phoneNumber && {phone: phoneNumber}),
             full_name: name,
             role: role,
-        }
-    });
+        },
+    };
+    const { data, error } = await supabase.auth.admin.createUser(attributes);
     if (error) {
         return { message: error.message };
     }
@@ -69,6 +69,8 @@ export async function inviteUser(
     if (rows.length === 0) {
         return { message: "Error creating user" };
     }
+
+    revalidatePath("/admin/members");
 
     return { message: "" };
 }

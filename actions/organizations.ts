@@ -147,6 +147,19 @@ export const getAllAdminsForOrganization = async (organizationId: number) => {
     return { success: true, data: admins };
 };
 
+export const getAllTrainersForOrganization = async (organizationId: number) => {
+    const trainers = await db
+        .select()
+        .from(usersTable)
+        .where(
+            and(
+                eq(usersTable.organizationId, organizationId),
+                eq(usersTable.role, "trainer"),
+            ),
+        );
+    return { success: true, data: trainers };
+};
+
 export const createAdmin = async (
     organizationId: number,
     phoneNumber: string,

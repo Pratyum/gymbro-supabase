@@ -1,6 +1,12 @@
+// components/memberships/new-member-dialog.tsx (modification)
 "use client";
 
+import { InviteUserParams, useInvite } from "@/hooks/use-invite";
+import { toast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import { PlusCircle } from "lucide-react";
+import { useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 import { Button } from "../ui/button";
 import {
     Dialog,
@@ -11,8 +17,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../ui/dialog";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { PhoneInput } from "../ui/phone-number";
 import {
     Select,
     SelectContent,
@@ -20,34 +27,64 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../ui/select";
-import { useState } from "react";
-type NewMemberDialogProps = {};
+
+
 export const NewMemberDialog = () => {
-    const [newMember, setNewMember] = useState({
+    const queryClient = useQueryClient();
+    const [open, setOpen] = useState(false);
+    const [formData, setFormData] = useState<InviteUserParams>({
         name: "",
-        phone: "",
-        plan: "",
-        status: "",
+        phone_number: "",
+        email: "",
+        role: "member",
     });
+
+    const { inviteUser, isInviting } = useInvite();
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setNewMember((prev) => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePhoneChange = (value: string) => {
+        setFormData(prev => ({ ...prev, phone_number: value }));
     };
 
     const handleSelectChange = (name: string, value: string) => {
-        setNewMember((prev) => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically send the data to your backend
-        console.log("New member data:", newMember);
-        // Reset the form
-        setNewMember({ name: "", phone: "", plan: "", status: "" });
+        if (!formData.name.trim()) {
+            toast({
+                title: "Validation Error",
+                description: "Name is required",
+                variant: "destructive",
+            });
+            return;
+        }
+        try {
+            await inviteUser(formData);
+            // Reset form and close dialog after successful invite
+            setFormData({
+                name: "",
+                phone_number: "",
+                email: "",
+                role: "member",
+            });
+            setOpen(false);
+            // Invalidate the query to refetch the updated list of members
+            queryClient.invalidateQueries({
+                queryKey: ["members"],
+            });
+        } catch (error) {
+            // Error handling is already done in the hook
+        }
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="emerald" className="items-center gap-2">
                     <PlusCircle /> New Member
@@ -57,76 +94,82 @@ export const NewMemberDialog = () => {
                 <DialogHeader>
                     <DialogTitle>Add New Member</DialogTitle>
                     <DialogDescription>
-                        {
-                            "Enter the details of the new member here. Click save when you're done."
-                        }
+                        {"Enter the details of the new member here. Click save when you're done."}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">
-                Name
+                                Name
                             </Label>
                             <Input
                                 id="name"
                                 name="name"
-                                value={newMember.name}
+                                value={formData.name}
                                 onChange={handleInputChange}
                                 className="col-span-3"
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="phone" className="text-right">
-                Phone
+                            <Label htmlFor="email" className="text-right">
+                                Email
                             </Label>
                             <Input
-                                id="phone"
-                                name="phone"
-                                value={newMember.phone}
+                                id="email"
+                                name="email"
+                                type="email"
+                                value={formData.email}
                                 onChange={handleInputChange}
                                 className="col-span-3"
+                                required
                             />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="phone_number" className="text-right">
+                                Phone
+                            </Label>
+                            <div className="col-span-3">
+                                <PhoneInput
+                                    placeholder="+919444489090"
+                                    name="phone_number"
+                                    value={formData.phone_number}
+                                    onChange={handlePhoneChange}
+                                />
+                            </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="plan" className="text-right">
-                Plan
+                                Role
                             </Label>
                             <Select
-                                onValueChange={(value) => handleSelectChange("plan", value)}
-                                value={newMember.plan}
+                                name="role"
+                                value={formData.role}
+                                onValueChange={(value) => handleSelectChange("role", value)}
                             >
                                 <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select a plan" />
+                                    <SelectValue placeholder="Select a role" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="basic">Basic</SelectItem>
-                                    <SelectItem value="standard">Standard</SelectItem>
-                                    <SelectItem value="premium">Premium</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="status" className="text-right">
-                Status
-                            </Label>
-                            <Select
-                                onValueChange={(value) => handleSelectChange("status", value)}
-                                value={newMember.status}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select a status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                    <SelectItem value="member">Member</SelectItem>
+                                    <SelectItem value="trainer">Trainer</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="emerald" type="submit">
-              Save changes
+                        <Button
+                            variant="emerald"
+                            type="submit"
+                            disabled={isInviting}
+                        >
+                            {isInviting ? (
+                                <>
+                                    <FaSpinner className="animate-spin mr-2" /> Sending Invitation...
+                                </>
+                            ) : (
+                                "Send Invitation"
+                            )}
                         </Button>
                     </DialogFooter>
                 </form>
