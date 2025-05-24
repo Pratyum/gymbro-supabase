@@ -1,7 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import {
+    boolean,
     integer,
     json,
+    numeric,
     pgEnum,
     pgTable,
     serial,
@@ -134,10 +136,6 @@ export const workoutPlan = pgTable("workout_plan", {
         .default(sql`ARRAY[]::day_of_week[]`),
     startDate: timestamp("start_date"),
 });
-
-export const workoutPlanRelations = relations(workoutPlan, ({ many }) => ({
-    items: many(workoutPlanItem, { relationName: "workoutPlanId" }),
-}));
 
 export const workoutPlanItem = pgTable("workout_plan_item", {
     id: serial("id").primaryKey(),
@@ -315,6 +313,93 @@ export const appointmentRelations = relations(appointments, ({ one }) => ({
     user: one(usersTable),
     trainer: one(usersTable),
 }));
+// Add these table definitions to your existing utils/db/schema.ts
+
+// Daily goals table (only non-workout goals)
+export const dailyGoals = pgTable("daily_goals", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+    stepsGoal: integer("steps_goal").default(10000),
+    waterGoal: integer("water_goal").default(8),
+    sleepGoal: integer("sleep_goal").default(8),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Program metadata (links trainer assignments to existing workout_plan)
+export const programMetadata = pgTable("program_metadata", {
+    id: serial("id").primaryKey(),
+    workoutPlanId: integer("workout_plan_id").notNull().references(() => workoutPlan.id, { onDelete: "cascade" }),
+    assignedBy: integer("assigned_by").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+    assignedTo: integer("assigned_to").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+    programName: text("program_name").notNull(),
+    description: text("description"),
+    durationWeeks: integer("duration_weeks").notNull(),
+    startDate: timestamp("start_date").notNull(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Daily goal tracking
+export const dailyGoalLogs = pgTable("daily_goal_logs", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+    date: timestamp("date").notNull(),
+    stepsCompleted: integer("steps_completed").default(0),
+    waterCompleted: integer("water_completed").default(0),
+    sleepHours: numeric("sleep_hours", { precision: 3, scale: 1 }).default("0"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+    uniqueUserDate: unique().on(table.userId, table.date),
+}));
+
+// Relations
+export const dailyGoalsRelations = relations(dailyGoals, ({ one }) => ({
+    user: one(usersTable, {
+        fields: [dailyGoals.userId],
+        references: [usersTable.id],
+    }),
+}));
+
+export const programMetadataRelations = relations(programMetadata, ({ one }) => ({
+    workoutPlan: one(workoutPlan, {
+        fields: [programMetadata.workoutPlanId],
+        references: [workoutPlan.id],
+    }),
+    trainer: one(usersTable, {
+        references: [usersTable.id],
+        fields: [programMetadata.assignedBy],
+        relationName: "trainer",
+    }),
+    client: one(usersTable, {
+        references: [usersTable.id],
+        fields: [programMetadata.assignedTo],
+        relationName: "client",
+    }),
+}));
+
+export const dailyGoalLogsRelations = relations(dailyGoalLogs, ({ one }) => ({
+    user: one(usersTable, {
+        fields: [dailyGoalLogs.userId],
+        references: [usersTable.id],
+    }),
+}));
+
+export const workoutPlanRelations = relations(workoutPlan, ({ many }) => ({
+    items: many(workoutPlanItem, { relationName: "workoutPlanId" }),
+    programMetadata: many(programMetadata), // Add this line
+}));
+
+// Type exports
+export type InsertDailyGoals = typeof dailyGoals.$inferInsert;
+export type SelectDailyGoals = typeof dailyGoals.$inferSelect;
+
+export type InsertProgramMetadata = typeof programMetadata.$inferInsert;
+export type SelectProgramMetadata = typeof programMetadata.$inferSelect;
+
+export type InsertDailyGoalLog = typeof dailyGoalLogs.$inferInsert;
+export type SelectDailyGoalLog = typeof dailyGoalLogs.$inferSelect;
 
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;

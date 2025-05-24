@@ -1,5 +1,5 @@
 import { db } from "@/utils/db/db";
-import { usersTable, workoutPlan } from "@/utils/db/schema";
+import { InsertUser, usersTable, workoutPlan } from "@/utils/db/schema";
 import { createClient } from "@/utils/supabase/server";
 import { eq, inArray } from "drizzle-orm";
 
@@ -28,4 +28,13 @@ export async function getUser() {
         .where(eq(usersTable.phoneNumber, user.phone as string));
 
     return { user, dbUser: dbUser[0] };
+}
+
+export async function updateUser(id: number, data: InsertUser) {
+    const updatedUser = await db
+        .update(usersTable)
+        .set(data)
+        .where(eq(usersTable.id, id))
+        .returning();
+    return updatedUser[0];
 }
