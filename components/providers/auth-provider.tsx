@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
 
     useEffect(() => {
+        let isMounted = true;
         async function getSession() {
             try {
                 setIsLoading(true);
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (sessionError) {
                     throw sessionError;
                 }
-
+                if (!isMounted) return;
                 setSession(session);
 
                 // If there's a session, get the user
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     if (userError) {
                         throw userError;
                     }
-
+                    if (!isMounted) return;
                     setSupabaseUser(user);
 
                     // Fetch the database user
@@ -56,14 +57,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         }
 
                         const data = await response.json();
+                        if (!isMounted) return;
                         setDbUser(data.dbUser);
                     }
                 }
             } catch (err) {
+                if (!isMounted) return;
                 console.error('Error getting user session:', err);
                 setError(err instanceof Error ? err : new Error(String(err)));
             } finally {
-                setIsLoading(false);
+                if(isMounted){
+                    setIsLoading(false);
+                }
             }
         }
 
@@ -101,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Clean up the subscription
         return () => {
             subscription.unsubscribe();
+            isMounted = false;
         };
     }, [supabase]);
 

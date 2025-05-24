@@ -1,4 +1,3 @@
-// components/trainer/client-assignment-dialog.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -107,14 +106,20 @@ export function ClientAssignmentDialog({
     // Assign client mutation
     const assignClientMutation = useMutation({
         mutationFn: async () => {
+            const clientId = parseInt(selectedClientId, 10);
+            const trainerId = parseInt(selectedTrainerId, 10);
+
+            if (isNaN(clientId) || isNaN(trainerId)) {
+                throw new Error("Invalid client or trainer ID");
+            }
             const response = await fetch("/api/trainer-client", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    clientId: parseInt(selectedClientId),
-                    trainerId: parseInt(selectedTrainerId),
+                    clientId,
+                    trainerId,
                     notes: notes || undefined,
                 }),
             });

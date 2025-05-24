@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
         const payload = await request.json();
 
         // Ensure the user has permission to invite
-        if (!dbUser.organizationId && !(dbUser.role !== "admin")) {
+        if (!dbUser.organizationId && dbUser.role !== "admin") {
             return NextResponse.json(
                 { success: false, message: "You don't have permission to invite users" },
                 { status: 403 }

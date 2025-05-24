@@ -50,6 +50,21 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+interface ClientAssignment {
+    assignment: {
+        id: number;
+        notes: string | null;
+        assignedAt: string;
+    };
+    client: {
+        id: number;
+        name: string;
+        email?: string;
+        phoneNumber: string;
+        plan: string;
+    };
+}
+
 export function TrainerClientList() {
     const {
         clients,
@@ -59,7 +74,7 @@ export function TrainerClientList() {
     } = useTrainerClients();
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedClient, setSelectedClient] = useState<any | null>(null);
+    const [selectedClient, setSelectedClient] = useState<ClientAssignment | null>(null);
     const [isEditingNotes, setIsEditingNotes] = useState(false);
     const [clientNotes, setClientNotes] = useState("");
     const [confirmUnassignOpen, setConfirmUnassignOpen] = useState(false);
@@ -215,7 +230,7 @@ export function TrainerClientList() {
                                                         <DropdownMenuItem
                                                             className="text-red-600"
                                                             onClick={() => {
-                                                                setSelectedClient(client);
+                                                                setSelectedClient(client as ClientAssignment);
                                                                 setConfirmUnassignOpen(true);
                                                             }}
                                                         >

@@ -1,4 +1,3 @@
-// app/api/trainer-tasks/route.ts
 import { getUser } from "@/actions/user";
 import { db } from "@/utils/db/db";
 import { trainerTasks, usersTable } from "@/utils/db/schema";
@@ -54,6 +53,15 @@ export async function POST(request: NextRequest) {
         // Validate required fields
         if (!payload.title) {
             return NextResponse.json({ success: false, message: "Title is required" }, { status: 400 });
+        }
+        // Validate enum fields
+        const validPriorities = ["low", "medium", "high"];
+        const validStatuses = ["pending", "in_progress", "completed"];
+        if (payload.priority && !validPriorities.includes(payload.priority)) {
+            return NextResponse.json({ success: false, message: "Invalid priority value" }, { status: 400 });
+        }
+        if (payload.status && !validStatuses.includes(payload.status)) {
+            return NextResponse.json({ success: false, message: "Invalid status value" }, { status: 400 });
         }
 
         // Create the task

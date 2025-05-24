@@ -33,6 +33,16 @@ export async function PATCH(
 
         const payload = await request.json();
 
+        // Validate enum fields if provided
+        const validPriorities = ["low", "medium", "high"];
+        const validStatuses = ["pending", "in_progress", "completed"];
+        if (payload.priority !== undefined && !validPriorities.includes(payload.priority)) {
+            return NextResponse.json({ success: false, message: "Invalid priority value" }, { status: 400 });
+        }
+        if (payload.status !== undefined && !validStatuses.includes(payload.status)) {
+            return NextResponse.json({ success: false, message: "Invalid status value" }, { status: 400 });
+        }
+
         // Update the task
         const updatedTask = await db
             .update(trainerTasks)

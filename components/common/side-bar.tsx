@@ -24,7 +24,8 @@ import { TeamSwitcher } from "./team-switcher";
 
 export const SidebarComponent = () => {
     const pathname = usePathname();
-    const activeTab = tabs.find((tab) => tab.link === pathname)?.id;
+    const allTabs = [...adminTabs, ...trainerTabs, ...tabs];
+    const activeTab = allTabs.find((tab) => tab.link === pathname)?.id;
     const { dbUser, supabaseUser } = useCurrentUser();
     const isAdmin = dbUser?.role === 'admin';
     const isTrainer = isAdmin || dbUser?.role === 'trainer';
@@ -100,10 +101,10 @@ export const SidebarComponent = () => {
                 </SidebarContent>
 
                 <SidebarFooter>
-                    <Suspense fallback={<Skeleton />}>
+                    <Suspense fallback={<Skeleton className="h-12 w-full" />}>
                         <NavUser user={{
-                            name: dbUser?.name ?? 'New User',
-                            email: dbUser?.email ?? 'EMAIL',
+                            name: dbUser?.name ?? 'Loading...',
+                            email: dbUser?.email ?? 'loading@example.com',
                             avatar: supabaseUser?.user_metadata?.avatar_url??'',
                         }} />
                     </Suspense>

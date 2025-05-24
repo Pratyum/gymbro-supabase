@@ -11,6 +11,11 @@ export async function getTrainerClients(trainerId?: number) {
         const { dbUser } = await getUser();
         const trainerIdToUse = trainerId || dbUser.id;
 
+        // Ensure user can access this trainer's data
+        if (trainerId && trainerId !== dbUser.id && dbUser.role !== "admin") {
+            return { success: false, message: "Unauthorized access" };
+        }
+
         // Get all clients for the trainer
         const assignments = await db
             .select({
@@ -78,6 +83,24 @@ export async function assignClientToTrainer(
     notes?: string
 ) {
     try {
+        // Validate trainer and client exist and have correct roles
+        const [trainer, client] = await Promise.all([
+            db.select().from(usersTable).where(and(
+                eq(usersTable.id, trainerId),
+                eq(usersTable.role, "trainer")
+            )),
+            db.select().from(usersTable).where(and(
+                eq(usersTable.id, clientId),
+                eq(usersTable.role, "member")
+            ))
+        ]);
+
+        if (!trainer.length) {
+            return { success: false, message: "Trainer not found" };
+        }
+        if (!client.length) {
+            return { success: false, message: "Client not found" };
+        }
         // Check if assignment already exists
         const existingAssignment = await db
             .select()
@@ -111,6 +134,24 @@ export async function assignClientToTrainer(
 // Unassign client from trainer
 export async function unassignClient(assignmentId: number) {
     try {
+        const { dbUser } = await getUser();
+
+        // Get the assignment to check ownership
+        const assignment = await db
+            .select()
+            .from(trainerClients)
+            .where(eq(trainerClients.id, assignmentId));
+
+        if (!assignment.length) {
+            return { success: false, message: "Assignment not found" };
+        }
+
+        // Check if user has permission to delete this assignment
+        if (dbUser.role !== "admin" &&
+            dbUser.id !== assignment[0].trainerId &&
+            dbUser.id !== assignment[0].clientId) {
+            return { success: false, message: "Unauthorized" };
+        }
         // Delete assignment
         await db
             .delete(trainerClients)

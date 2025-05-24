@@ -51,6 +51,7 @@ import {
     Plus,
     UserRound
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 type Task = {
@@ -318,7 +319,7 @@ export function TrainerTasks({ limit, showAll = false }: { limit?: number; showA
                         <Label>Status:</Label>
                         <Select
                             value={filters.status}
-                            onValueChange={(value: any) => setFilters(prev => ({ ...prev, status: value }))}
+                            onValueChange={(value: any) => setFilters(prev => ({ ...prev, status: value as TaskFilter['status'] }))}
                         >
                             <SelectTrigger className="w-[130px]">
                                 <SelectValue placeholder="Filter by status" />
@@ -336,7 +337,7 @@ export function TrainerTasks({ limit, showAll = false }: { limit?: number; showA
                         <Label>Priority:</Label>
                         <Select
                             value={filters.priority}
-                            onValueChange={(value: any) => setFilters(prev => ({ ...prev, priority: value }))}
+                            onValueChange={(value: any) => setFilters(prev => ({ ...prev, priority: value as TaskFilter['priority'] }))}
                         >
                             <SelectTrigger className="w-[130px]">
                                 <SelectValue placeholder="Filter by priority" />
@@ -491,8 +492,10 @@ export function TrainerTasks({ limit, showAll = false }: { limit?: number; showA
 
             {!showAll && displayedTasks && displayedTasks.length > (limit??0) && (
                 <CardFooter className="flex justify-center pt-2">
-                    <Button variant="link" onClick={() => window.location.href = "/trainer/tasks"}>
-                        View All Tasks
+                    <Button asChild>
+                        <Link href="/trainer/tasks">
+                            View All Tasks
+                        </Link>
                     </Button>
                 </CardFooter>
             )}
@@ -540,14 +543,14 @@ export function TrainerTasks({ limit, showAll = false }: { limit?: number; showA
                                 </Label>
                                 <Select
                                     value={newTask.clientId?.toString() || ""}
-                                    onValueChange={(value) => setNewTask({ ...newTask, clientId: value ? parseInt(value, 10) : null })}
+                                    onValueChange={(value: any) => setNewTask({ ...newTask, clientId: value ? parseInt(value, 10) : null })}
                                 >
                                     <SelectTrigger id="client" className="col-span-3">
                                         <SelectValue placeholder="Select a client (optional)" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="">None</SelectItem>
-                                        {clients?.map((client: any) => (
+                                        {clients?.map((client: {id: number; name: string;}) => (
                                             <SelectItem key={client.id} value={client.id.toString()}>
                                                 {client.name}
                                             </SelectItem>
@@ -575,7 +578,7 @@ export function TrainerTasks({ limit, showAll = false }: { limit?: number; showA
                                 </Label>
                                 <Select
                                     value={newTask.priority}
-                                    onValueChange={(value: any) => setNewTask({ ...newTask, priority: value })}
+                                    onValueChange={(value: any) => setNewTask({ ...newTask, priority: value as Task['priority'] })}
                                 >
                                     <SelectTrigger id="priority" className="col-span-3">
                                         <SelectValue placeholder="Select priority" />

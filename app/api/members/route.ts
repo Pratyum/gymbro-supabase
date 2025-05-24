@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
         const result = await getAllMembersForOrganization(dbUser.organizationId);
         return NextResponse.json(result);
     }catch (error) {
+        console.error("Error fetching members:", error instanceof Error ? error.message : error);
         return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
     }
 }

@@ -2,6 +2,7 @@
 "use client";
 
 import { InviteUserParams, useInvite } from "@/hooks/use-invite";
+import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { PlusCircle } from "lucide-react";
 import { useState } from "react";
@@ -27,7 +28,6 @@ import {
     SelectValue,
 } from "../ui/select";
 
-type NewMemberDialogProps = {};
 
 export const NewMemberDialog = () => {
     const queryClient = useQueryClient();
@@ -56,6 +56,14 @@ export const NewMemberDialog = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.name.trim()) {
+            toast({
+                title: "Validation Error",
+                description: "Name is required",
+                variant: "destructive",
+            });
+            return;
+        }
         try {
             await inviteUser(formData);
             // Reset form and close dialog after successful invite

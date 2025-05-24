@@ -3,6 +3,13 @@ import { db } from "@/utils/db/db";
 import { trainerClients, usersTable } from "@/utils/db/schema";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const assignClientSchema = z.object({
+    clientId: z.number(),
+    notes: z.string().max(500).optional()
+});
+
 
 // Get all clients assigned to a trainer
 export async function GET(request: NextRequest) {
@@ -34,7 +41,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const { dbUser } = await getUser();
-        const { clientId, notes } = await request.json();
+        const body = await request.json();
+        const { clientId, notes } = assignClientSchema.parse(body);
 
         // Verify user is a trainer or admin
         if (dbUser.role !== "trainer" && dbUser.role !== "admin") {

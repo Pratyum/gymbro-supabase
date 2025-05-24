@@ -25,7 +25,7 @@ export const adminTabs = [
 ];
 export const trainerTabs = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, link: "/trainer/dashboard" },
-    { id: "sessions", label: "Members", icon: Calendar, link: "/trainer/schedule" },
+    { id: "schedule", label: "Schedule", icon: Calendar, link: "/trainer/schedule" },
 ]
 export const tabs = [
     { id: "weight", label: "Weight log", icon: Scale, link: "/weight" },

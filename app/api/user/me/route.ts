@@ -13,7 +13,7 @@ export async function GET() {
             user
         });
     } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error fetching user:", error instanceof Error ? error.message : error);
         return NextResponse.json(
             { success: false, error: "Failed to fetch user" },
             { status: 500 }

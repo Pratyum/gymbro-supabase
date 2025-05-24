@@ -4,7 +4,6 @@ import { InviteUserParams, useInvite } from "@/hooks/use-invite";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
 import { FaSpinner } from "react-icons/fa";
 import { Button } from "../ui/button";
 import {
@@ -36,7 +35,6 @@ export function AddTrainerForm() {
     });
 
     const { inviteUser, isInviting } = useInvite();
-    const { pending } = useFormStatus();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -126,9 +124,9 @@ export function AddTrainerForm() {
                 variant="emerald"
                 type="submit"
                 className="w-full"
-                disabled={isInviting || pending}
+                disabled={isInviting}
             >
-                {(isInviting || pending) ? (
+                {isInviting ? (
                     <>
                         <FaSpinner className="animate-spin mr-2" /> Sending Invitation...
                     </>

@@ -8,15 +8,16 @@ export async function GET(request: NextRequest) {
         const {dbUser} = await getUser();
         if(!dbUser) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         if(!dbUser.organizationId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        if (!dbUser.organizationId && !(dbUser.role === "admin")) {
+        if (!dbUser.organizationId) {
             return NextResponse.json(
-                { success: false, message: "You don't have permission to invite users" },
+                { success: false, message: "You don't have permission to access trainers" },
                 { status: 403 }
             );
         }
         const result = await getAllTrainersForOrganization(dbUser.organizationId);
         return NextResponse.json(result);
     }catch (error) {
+        console.error("Error fetching trainers:", error instanceof Error ? error.message : error);
         return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
     }
 }

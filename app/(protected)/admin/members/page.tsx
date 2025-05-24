@@ -9,7 +9,7 @@ export default async function MembershipsPage() {
         return notFound();
     }
     const {success, data: members} = await getAllMembersForOrganization(dbUser.organizationId);
-    if(!success || !members || members.length === 0){
+    if(!success || !members){
         return notFound();
     }
 

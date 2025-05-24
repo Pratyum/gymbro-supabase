@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Tabs,
     TabsContent,
@@ -141,13 +142,12 @@ export default function TrainerDashboard() {
                                         <CalendarIcon className="mr-2" /> My Schedule
                                     </CardTitle>
                                     <CardDescription>
-                                        View and manage your upcoming sessions
+                                        View and manage your upcoming sessions (Comming soon)
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <iframe
-                                        src="/trainer/schedule"
-                                        className="w-full h-[600px] border-0"
+                                    <Skeleton
+                                        className="h-40 w-full rounded-md"
                                     />
                                 </CardContent>
                             </Card>
